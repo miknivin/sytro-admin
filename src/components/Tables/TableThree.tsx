@@ -1,5 +1,4 @@
 "use client";
-
 import { useGetProductsQuery } from "@/redux/api/productsApi"; // Adjust the import path based on your API slice
 import { Package } from "@/types/package";
 import { Product } from "@/types/product";
@@ -62,7 +61,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
                   </h5>
                 </td>
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                  <p className="text-black dark:text-white">${product.offer}</p>
+                  <p className="text-black dark:text-white">₹{product.offer}</p>
                 </td>
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <p className="text-black dark:text-white">{product.stock}</p>
