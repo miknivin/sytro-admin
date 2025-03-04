@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db/connection';
-import products from '@/models/Products';
+import { Product } from '@/models/Products';
 
 export async function GET(req, { params }) {
   try {
@@ -15,7 +15,7 @@ export async function GET(req, { params }) {
       );
     }
 
-    const productById = await products.findById(productId)
+    const productById = await Product.findById(productId)
       .populate({
         path: 'reviews.user',
         select: 'name email avatar'  // Select only the fields you need

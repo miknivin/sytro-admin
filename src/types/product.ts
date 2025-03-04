@@ -27,7 +27,7 @@ type Details = {
 
 type Image = {
   url: string;
-  public_id?: string;
+ _id: string;
 };
 
 export type Product = {
@@ -46,4 +46,5 @@ export type Product = {
   user: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  templateImages:any[]
 };

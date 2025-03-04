@@ -36,17 +36,19 @@ const productSchema = new mongoose.Schema(
         },
       },
     ],
-    choiceImages: {
-      type: [{ type: String }],
-      set: (arr) => (arr ? [...new Set(arr)] : undefined),
-      validate: {
-        validator: function (arr) {
-          return !arr || new Set(arr).size === arr.length;
+    templateImages: [
+      {
+        smallBagImage: {
+          type: String,
+          required: false,
         },
-        message: "Choice images must have unique URLs",
+        largeBagImage: {
+          type: String,
+          required: false,
+        },
+         name: { type: String, default: "" }
       },
-      required: false,
-    },
+    ],
     category: {
       type: String,
       required: [true, "Please enter bag category"],

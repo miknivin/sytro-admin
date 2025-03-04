@@ -5,7 +5,7 @@ export default function page() {
     return (
         <>
       <DefaultLayout>
-      <TableThree />
+        <TableThree />
       </DefaultLayout>
     </>
     );

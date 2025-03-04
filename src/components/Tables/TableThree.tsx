@@ -7,24 +7,35 @@ import UploadIcon from "../SvgIcons/UploadIcon";
 import { useState } from "react";
 import ReusableModal from "../Modals/ReusableModal";
 import SimpleFileInput from "@/components/FormElements/fileInput/SimpleFileInput";
-
+import ImagesIcon from "../SvgIcons/ImagesIcon";
+import ProductImagesUpload from "../FormElements/fileInput/ProductImagesUpload";
 
 const TableThree = () => {
   const { data, isLoading, isError } = useGetProductsQuery({
-    page: 1, 
+    page: 1,
   });
-const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImagesModalOpen, setIsImagesModalOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState<Product | null>();
   if (isLoading) {
-    return <Spinner/>;
+    return <Spinner />;
   }
 
   const openModal = () => {
     setIsModalOpen(true);
   };
+  const openImagesModal = (product: Product) => {
+    setCurrentProduct(product);
+    setIsImagesModalOpen(true);
+  };
   const closeModal = () => {
     setIsModalOpen(false);
   };
-  const kidsProductId = "67a70ca93f464380b64b05a6"
+  const closeImagesModal = () => {
+    setCurrentProduct(null);
+    setIsImagesModalOpen(false);
+  };
+  const kidsProductId = "67a70ca93f464380b64b05a6";
   if (isError) {
     return <p>Failed to load products.</p>;
   }
@@ -53,7 +64,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
             </tr>
           </thead>
           <tbody>
-            {data?.filteredProducts?.map((product:Product, key:number) => (
+            {data?.filteredProducts?.map((product: Product, key: number) => (
               <tr key={key}>
                 <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
@@ -67,27 +78,49 @@ const [isModalOpen, setIsModalOpen] = useState(false);
                   <p className="text-black dark:text-white">{product.stock}</p>
                 </td>
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                  <p className="text-black dark:text-white">{product.ratings} ⭐</p>
+                  <p className="text-black dark:text-white">
+                    {product.ratings} ⭐
+                  </p>
                 </td>
-                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark flex flex-wrap gap-3">
-                 {product._id.toString()===kidsProductId&&(
-                    <button onClick={openModal} className="btn p-3 bg-primary hover:bg-primary/80">
-                    <UploadIcon/>
-                   </button>
-                 )}
-                 
-                  <button disabled className="hover:text-primary">View</button>
-                 
+                <td className="flex flex-wrap gap-3 border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                  {product._id.toString() === kidsProductId && (
+                    <button
+                      onClick={openModal}
+                      className="btn bg-primary p-3 hover:bg-primary/80"
+                    >
+                      <UploadIcon />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => openImagesModal(product)}
+                    className="btn bg-primary p-3 hover:bg-primary/80"
+                  >
+                    <ImagesIcon />
+                  </button>
+
+                  <button disabled className="hover:text-primary">
+                    View
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {isModalOpen&&(
-         <ReusableModal onClose={closeModal} formContent={<SimpleFileInput/>} title={"Add Choice Images"} />
+      {isModalOpen && (
+        <ReusableModal
+          onClose={closeModal}
+          formContent={<SimpleFileInput />}
+          title={"Add Choice Images"}
+        />
       )}
-     
+      {isImagesModalOpen && currentProduct && (
+        <ReusableModal
+          onClose={closeImagesModal}
+          formContent={<ProductImagesUpload product={currentProduct} onClose={closeImagesModal} />}
+          title={"Product images"}
+        />
+      )}
     </div>
   );
 };
