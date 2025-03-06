@@ -5,7 +5,7 @@ import {
   useDeleteProductImageMutation,
 } from "@/redux/api/productsApi";
 import { Product } from "@/types/product";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 interface ProductImagesUploadProps {
@@ -24,16 +24,24 @@ export default function ProductImagesUpload({
   const [deleteProductImage, { isLoading: isDeleting }] =
     useDeleteProductImageMutation();
 
+  // Cleanup preview URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      previews.forEach((preview) => URL.revokeObjectURL(preview));
+    };
+  }, [previews]);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    if (files.length > 0) {
-      setSelectedFiles(files);
-      const newPreviews = files.map((file) => URL.createObjectURL(file));
-      setPreviews(newPreviews);
-    } else {
-      setSelectedFiles([]);
-      setPreviews([]);
+    const newFiles = Array.from(event.target.files || []);
+    if (newFiles.length > 0) {
+      // Merge new files with existing selectedFiles
+      setSelectedFiles((prevFiles) => [...prevFiles, ...newFiles]);
+
+      // Generate previews for new files and merge with existing previews
+      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+      setPreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
     }
+    // If no files selected, do nothing (keep existing selections)
   };
 
   const handleUpload = async () => {
@@ -52,13 +60,19 @@ export default function ProductImagesUpload({
         id: product._id,
         formData,
       }).unwrap();
+
       toast.success("Images uploaded successfully!");
+
+      if (result?.images) {
+        setProductImages((prevImages) => [...prevImages, ...result.images]);
+      } else {
+        toast.error(
+          "Images uploaded but not reflected yet. Refresh to see changes.",
+        );
+      }
+
       setSelectedFiles([]);
       setPreviews([]);
-      // Update productImages with newly uploaded images if your API returns them
-      if (result?.images) {
-        setProductImages([...productImages, ...result.images]);
-      }
       onClose();
     } catch (error) {
       console.error("Upload failed", error);
@@ -84,7 +98,11 @@ export default function ProductImagesUpload({
 
   const removePreview = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => {
+      const newPreviews = prev.filter((_, i) => i !== index);
+      URL.revokeObjectURL(prev[index]);
+      return newPreviews;
+    });
   };
 
   return (
