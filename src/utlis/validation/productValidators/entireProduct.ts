@@ -9,7 +9,6 @@ export const isProductValid = (product: Product): boolean => {
     (product.details.features?.length ?? 0) > 0 && // Ensure features is an array and not empty
     (product.details.materialUsed?.length ?? 0) > 0 && // Ensure materialUsed is an array and not empty
     product.category.trim() !== "" &&
-    product.stock >= 0 &&
-    product.images.length > 0
+    product.stock >= 0
   );
 };

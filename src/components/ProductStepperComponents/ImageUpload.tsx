@@ -29,7 +29,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ productProp, updateProduct, h
     setImageUrl(event.target.value);
   };
 
-  // Handle manual URL submission
   const handleUrlSubmit = () => {
     if (imageUrl.trim() !== "") {
       setImageUrls((prevUrls) => [...prevUrls, imageUrl]); // Add the new URL to the list

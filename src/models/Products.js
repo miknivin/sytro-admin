@@ -15,10 +15,14 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
-    description: {
-      type: String,
-      required: [true, "Please enter bag description"],
-      maxLength: [5000, "Description cannot exceed 5000 characters"],
+    details: {
+      description: {
+        type: String,
+        required: [true, "Please enter bag description"],
+        maxLength: [5000, "Description cannot exceed 5000 characters"],
+      },
+      features: [{ type: String }], // Removed enum restriction
+      materialUsed: [{ type: String }],
     },
     ratings: {
       type: Number,
@@ -32,21 +36,8 @@ const productSchema = new mongoose.Schema(
         },
         url: {
           type: String,
-          required: false,
+          required: true,
         },
-      },
-    ],
-    templateImages: [
-      {
-        smallBagImage: {
-          type: String,
-          required: false,
-        },
-        largeBagImage: {
-          type: String,
-          required: false,
-        },
-         name: { type: String, default: "" }
       },
     ],
     category: {
@@ -57,27 +48,32 @@ const productSchema = new mongoose.Schema(
         message: "Please select correct category",
       },
     },
+    specifications: {
+      dimensions: {
+        length: Number,
+        width: Number,
+        height: Number,
+        unit: {
+          type: String,
+          enum: ["cm", "inches"],
+        },
+      },
+      color: {
+        type: String,
+      },
+      weight: {
+        type: Number,
+      },
+    },
     capacity: {
       type: Number,
       required: [true, "Please enter bag capacity in litres"],
     },
-    features: [
-      {
-        type: String,
-        enum: [
-          "Adjustable Strap",
-          "Multiple Compartments",
-          "Water Resistant",
-          "Zip Closure",
-          "Side Pockets",
-          "Front Pocket",
-          "Cushioned Straps",
-          "Laptop Compartment",
-          "Bottle Holder",
-          "Trolley Support",
-        ],
-      },
-    ],
+    size: {
+      type: String,
+      enum: ["Small", "Medium", "Large"],
+      required: true,
+    },
     stock: {
       type: Number,
       required: [true, "Please enter bag stock"],
@@ -109,10 +105,9 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-// Check if model exists before creating
 const Product =
   mongoose.models.Product || mongoose.model("Product", productSchema);
 

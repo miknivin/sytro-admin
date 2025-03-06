@@ -50,7 +50,7 @@ export const productApi = createApi({
           body,
         };
       },
-      invalidatesTags: ["AdminProducts"],
+      invalidatesTags: ["AdminProducts","Product"],
     }),
     uploadProductImages: builder.mutation({
       query({ id, formData }) {

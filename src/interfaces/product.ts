@@ -1,38 +1,39 @@
 export interface Product {
-    _id?: string;
-    name: string;
-    actualPrice: number;
-    offer?: number;
-    details: {
-      description: string;
-      features?: string[];
-      materialUsed?: string[];
+  _id?: string;
+  name: string;
+  actualPrice: number;
+  offer?: number;
+  details: {
+    description: string;
+    features?: string[];
+    materialUsed?: string[];
+  };
+  ratings?: number;
+  images: {
+    public_id?: string;
+    url: string;
+  }[];
+  category: "Kids Bags" | "Casual Bags" | "Travel Bags";
+  specifications?: {
+    dimensions?: {
+      length?: number;
+      width?: number;
+      height?: number;
+      unit?: "cm" | "inches";
     };
-    ratings?: number;
-    images: {
-      public_id?: string;
-      url: string;
-    }[];
-    category: "Kids Bags" | "Casual Bags" | "Travel Bags";
-    specifications?: {
-      dimensions?: {
-        length?: number;
-        width?: number;
-        height?: number;
-        unit?: "cm" | "inches";
-      };
-      color?: string;
-      weight?: number;
-    };
-    stock: number;
-    numOfReviews?: number;
-    reviews?: {
-      user: string;
-      ratings: number;
-      comment: string;
-    }[];
+    color?: string;
+    weight?: number;
+  };
+  capacity: number; // Added capacity
+  size: "Small" | "Medium" | "Large"; // Added size as an ENUM
+  stock: number;
+  numOfReviews?: number;
+  reviews?: {
     user: string;
-    createdAt?: string;
-    updatedAt?: string;
-  }
-  
+    ratings: number;
+    comment: string;
+  }[];
+  user: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
