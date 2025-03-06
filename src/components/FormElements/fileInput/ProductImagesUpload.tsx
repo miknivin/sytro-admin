@@ -17,38 +17,48 @@ export default function ProductImagesUpload({
   product,
   onClose,
 }: ProductImagesUploadProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [productImages, setProductImages] = useState(product.images); // Local state
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [productImages, setProductImages] = useState(product.images);
   const [uploadProductImages, { isLoading }] = useUploadProductImagesMutation();
   const [deleteProductImage, { isLoading: isDeleting }] =
     useDeleteProductImageMutation();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    if (file) {
-      setSelectedFile(file);
-      setPreview(URL.createObjectURL(file));
+    const files = Array.from(event.target.files || []);
+    if (files.length > 0) {
+      setSelectedFiles(files);
+      const newPreviews = files.map((file) => URL.createObjectURL(file));
+      setPreviews(newPreviews);
     } else {
-      setSelectedFile(null);
-      setPreview(null);
+      setSelectedFiles([]);
+      setPreviews([]);
     }
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) {
-      toast.error("Please select a file first.");
+    if (selectedFiles.length === 0) {
+      toast.error("Please select at least one file first.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("images", selectedFile);
+    selectedFiles.forEach((file) => {
+      formData.append("images", file);
+    });
 
     try {
-      await uploadProductImages({ id: product._id, formData }).unwrap();
-      toast.success("Image uploaded successfully!");
-      setSelectedFile(null);
-      setPreview(null);
+      const result = await uploadProductImages({
+        id: product._id,
+        formData,
+      }).unwrap();
+      toast.success("Images uploaded successfully!");
+      setSelectedFiles([]);
+      setPreviews([]);
+      // Update productImages with newly uploaded images if your API returns them
+      if (result?.images) {
+        setProductImages([...productImages, ...result.images]);
+      }
       onClose();
     } catch (error) {
       console.error("Upload failed", error);
@@ -63,8 +73,6 @@ export default function ProductImagesUpload({
         body: { imageId },
       }).unwrap();
       toast.success("Image deleted successfully!");
-
-      // Remove deleted image from state
       setProductImages((prevImages) =>
         prevImages.filter((image) => image._id !== imageId),
       );
@@ -72,6 +80,11 @@ export default function ProductImagesUpload({
       console.error("Error deleting image:", error);
       toast.error("Failed to delete image.");
     }
+  };
+
+  const removePreview = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -88,31 +101,31 @@ export default function ProductImagesUpload({
         <input
           type="file"
           name="largeBag"
+          multiple
           accept=".png, .jpg, .webp, .jpeg"
           className="file-input file-input-bordered w-full"
           onChange={handleFileChange}
         />
       </label>
 
-      {preview && (
+      {previews.length > 0 && (
         <div className="flex flex-wrap gap-3">
-          <div className="relative mt-2 w-fit">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedFile(null);
-                setPreview(null);
-              }}
-              className="badge badge-error badge-sm absolute right-0 top-0 z-30 h-auto rounded-full !p-1"
-            >
-              ✖
-            </button>
-            <img
-              className="mask mask-squircle h-24 w-24 object-cover"
-              src={preview}
-              alt="Selected Preview"
-            />
-          </div>
+          {previews.map((preview, index) => (
+            <div className="relative mt-2 w-fit" key={index}>
+              <button
+                type="button"
+                onClick={() => removePreview(index)}
+                className="badge badge-error badge-sm absolute right-0 top-0 z-30 h-auto rounded-full !p-1"
+              >
+                ✖
+              </button>
+              <img
+                className="mask mask-squircle h-24 w-24 object-cover"
+                src={preview}
+                alt={`Preview ${index + 1}`}
+              />
+            </div>
+          ))}
         </div>
       )}
 
