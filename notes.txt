@@ -240,3 +240,8 @@ const FormLayout = () => {
 };
 
 export default FormLayout;
+
+
+mongodb+srv://sytrobags:KqXIn1DtRTwK2hC5@cluster0.6ou2w.mongodb.net/sytro?retryWrites=true&w=majority&appName=Cluster0
+
+MONGODB_URI = mongodb+srv://NIVIN:Nivin23@cluster0.wdtxlhm.mongodb.net/styro?retryWrites=true&w=majority&appName=Cluster0
