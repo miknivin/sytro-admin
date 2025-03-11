@@ -44,12 +44,12 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
           </div> */}
         </div>
         <div className="flex w-full items-start justify-between space-x-8">
-          <p className="text-base leading-6 xl:text-lg">${price}</p>
+          <p className="text-base leading-6 xl:text-lg">₹{price}</p>
           <p className="text-base leading-6 text-gray-800 dark:text-gray-100 xl:text-lg">
             {quantity}
           </p>
           <p className="text-base font-semibold leading-6 text-gray-800 dark:text-gray-100 xl:text-lg">
-            ${Number(price) * quantity}
+            ₹{Number(price) * quantity}
           </p>
         </div>
       </div>
