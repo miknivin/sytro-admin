@@ -13,7 +13,7 @@ const OrderSummary: React.FC<{ order: Order }> = ({ order }) => {
             Subtotal
           </p>
           <p className="text-base dark:text-gray-300 leading-4 text-gray-600">
-            ${order.itemsPrice.toFixed(2)}
+          ₹{order.itemsPrice.toFixed(2)}
           </p>
         </div>
         <div className="flex justify-between items-center w-full">
@@ -21,7 +21,7 @@ const OrderSummary: React.FC<{ order: Order }> = ({ order }) => {
             Shipping
           </p>
           <p className="text-base dark:text-gray-300 leading-4 text-gray-600">
-            ${order.shippingAmount.toFixed(2)}
+          ₹{order.shippingAmount.toFixed(2)}
           </p>
         </div>
         <div className="flex justify-between items-center w-full">
@@ -29,7 +29,7 @@ const OrderSummary: React.FC<{ order: Order }> = ({ order }) => {
             Tax
           </p>
           <p className="text-base dark:text-gray-300 leading-4 text-gray-600">
-            ${order.taxAmount.toFixed(2)}
+          ₹{order.taxAmount.toFixed(2)}
           </p>
         </div>
       </div>
@@ -38,7 +38,7 @@ const OrderSummary: React.FC<{ order: Order }> = ({ order }) => {
           Total
         </p>
         <p className="text-base dark:text-gray-300 font-semibold leading-4 text-gray-600">
-          ${order.totalAmount.toFixed(2)}
+        ₹{order.totalAmount.toFixed(2)}
         </p>
       </div>
     </div>
