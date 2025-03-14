@@ -8,12 +8,18 @@ import { validateForm } from "@/utlis/validation/productValidators/basicDetails"
 
 interface BasicDetailsProps {
   productProp: Product;
-  updateProduct: (data: Product) => void; 
-  handleNextStep:()=>void
+  updateProduct: (data: Product) => void;
+  handleNextStep: () => void;
+  isUpdate: boolean;
 }
 
-const BasicDetails: React.FC<BasicDetailsProps> = ({ productProp, updateProduct, handleNextStep }) => {
-  const [productState, setProductState] = useState<Product>(productProp); 
+const BasicDetails: React.FC<BasicDetailsProps> = ({
+  productProp,
+  updateProduct,
+  handleNextStep,
+  isUpdate = false,
+}) => {
+  const [productState, setProductState] = useState<Product>(productProp);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -21,7 +27,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ productProp, updateProduct,
       ...productState,
       [name]: type === "number" ? (value === "" ? "" : Number(value)) : value,
     };
-    
+
     setProductState(updatedProduct);
     updateProduct(updatedProduct);
   };
@@ -32,7 +38,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ productProp, updateProduct,
       ...productState,
       category: value,
     };
-    
+
     setProductState(updatedProduct);
     updateProduct(updatedProduct);
   };
@@ -41,23 +47,23 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ productProp, updateProduct,
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const { isValid, errors } = validateForm(productState);
-    
+
     if (!isValid) {
       Swal.fire({
-        title: 'Validation Error',
-        html: errors.join('<br>'),
-        icon: 'error'
+        title: "Validation Error",
+        html: errors.join("<br>"),
+        icon: "error",
       });
       return;
     }
-   
+
     updateProduct(productState);
     handleNextStep();
-   };
+  };
 
   return (
-    <div className="p-4 border rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Step 1: Basic Details</h2>
+    <div className="rounded-lg border p-4 shadow-md">
+      <h2 className="mb-4 text-xl font-semibold">Step 1: Basic Details</h2>
       <form onSubmit={handleSubmit}>
         <div className="p-6.5">
           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
@@ -125,14 +131,18 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ productProp, updateProduct,
           </div>
 
           {/* Category Selection */}
-          <SelectGroupOne category={productState.category} sendValue={handleSendValue}  />
-
-          <button
-            type="submit"
-            className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-          >
-            Submit
-          </button>
+          <SelectGroupOne
+            category={productState.category}
+            sendValue={handleSendValue}
+          />
+          {!isUpdate && (
+            <button
+              type="submit"
+              className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+            >
+              Submit
+            </button>
+          )}
         </div>
       </form>
     </div>

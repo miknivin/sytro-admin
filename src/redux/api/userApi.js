@@ -90,7 +90,7 @@ export const userApi = createApi({
     deleteUser: builder.mutation({
       query(id) {
         return {
-          url: `/users/deleteUser/${id}`,
+          url: `/users/delete-user/${id}`,
           method: "DELETE",
         };
       },

@@ -6,6 +6,10 @@ import ChartTwo from "../Charts/ChartTwo";
 import ChatCard from "../Chat/ChatCard";
 import TableOne from "../Tables/TableOne";
 import CardDataStats from "../CardDataStats";
+import { useGetStatsQuery } from "@/redux/api/dashboardApi";
+import OrderTable from "../Tables/OrderTable";
+import DashboardOrderTable from "../Tables/DashboardOrderTable";
+import Spinner from "../common/Spinner";
 
 const MapOne = dynamic(() => import("@/components/Maps/MapOne"), {
   ssr: false,
@@ -16,10 +20,26 @@ const ChartThree = dynamic(() => import("@/components/Charts/ChartThree"), {
 });
 
 const ECommerce: React.FC = () => {
+  const { data, isLoading, error } = useGetStatsQuery(null);
+
+  // Show loading state
+  if (isLoading) {
+    return <div><Spinner/></div>;
+  }
+
+  // Handle error state
+  if (error) {
+    return <div>Error loading stats</div>;
+  }
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats title="Total Orders" total="$3.456K" rate="0.43%" levelUp>
+        <CardDataStats
+          title="Total Orders"
+          total={data?.totalOrders}
+          rate="0.43%"
+          levelUp
+        >
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -38,7 +58,12 @@ const ECommerce: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Total Profit" total="$45,2K" rate="4.35%" levelUp>
+        <CardDataStats
+          title="Total Amount"
+          total={"₹" + data?.totalAmount}
+          rate="4.35%"
+          levelUp
+        >
           <svg
             className="fill-primary dark:fill-white"
             width="20"
@@ -61,7 +86,12 @@ const ECommerce: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Total Product" total="2.450" rate="2.59%" levelUp>
+        <CardDataStats
+          title="Total Product"
+          total={data.totalProducts}
+          rate="2.59%"
+          levelUp
+        >
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -80,7 +110,12 @@ const ECommerce: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Total Users" total="3.456" rate="0.95%" levelDown>
+        <CardDataStats
+          title="Total Users"
+          total={data.totalUsers}
+          rate="0.95%"
+          levelDown
+        >
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -111,7 +146,7 @@ const ECommerce: React.FC = () => {
         {/* <ChartThree />
         <MapOne /> */}
         <div className="col-span-12 xl:col-span-8">
-          <TableOne />
+          <DashboardOrderTable limit={5} />
         </div>
         <ChatCard />
       </div>

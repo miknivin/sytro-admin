@@ -13,7 +13,7 @@ export default function SignininForm() {
 
     try {
       const result = await login({ email, password }).unwrap();
-      
+
       Swal.fire({
         icon: "success",
         title: "Login Successful",
@@ -81,7 +81,7 @@ export default function SignininForm() {
           </button>
         </div>
 
-        <SigninWithGoogle />
+        {/* <SigninWithGoogle /> */}
       </form>
     </div>
   );

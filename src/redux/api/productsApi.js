@@ -14,6 +14,7 @@ export const productApi = createApi({
           page: params?.page,
           keyword: params?.keyword,
           category: params?.category,
+          limit: params?.limit,
           "price[gte]": params?.min,
           "price[lte]": params?.max,
           "ratings[gte]": params?.ratings,
@@ -50,7 +51,7 @@ export const productApi = createApi({
           body,
         };
       },
-      invalidatesTags: ["AdminProducts","Product"],
+      invalidatesTags: ["AdminProducts", "Product"],
     }),
     uploadProductImages: builder.mutation({
       query({ id, formData }) {
@@ -79,7 +80,7 @@ export const productApi = createApi({
     updateProduct: builder.mutation({
       query({ id, body }) {
         return {
-          url: `/admin/products/${id}`,
+          url: `/products/update/${id}`,
           method: "PUT",
           body,
         };
@@ -89,11 +90,11 @@ export const productApi = createApi({
     deleteProduct: builder.mutation({
       query(id) {
         return {
-          url: `/admin/products/${id}`,
+          url: `/products/delete/${id}`,
           method: "DELETE",
         };
       },
-      invalidatesTags: ["AdminProducts"],
+      invalidatesTags: ["AdminProducts", "Product"],
     }),
     deleteProductImage: builder.mutation({
       query({ id, body }) {

@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import GraySpinner from "@/components/common/GraySpinner";
 import {
   useUploadProductImagesMutation,
   useDeleteProductImageMutation,
@@ -158,10 +159,10 @@ export default function ProductImagesUpload({
               type="button"
               id="deleteUploadedImage"
               onClick={() => handleDelete(item._id)}
-              disabled={isDeleting}
+              disabled={isDeleting || productImages.length <= 2}
               className="badge badge-error badge-sm absolute right-0 top-0 z-30 h-auto rounded-full !p-1"
             >
-              ✖
+              {isDeleting ? <GraySpinner /> : "✖"}
             </button>
             <img
               className="mask mask-squircle h-24 w-24 object-cover"

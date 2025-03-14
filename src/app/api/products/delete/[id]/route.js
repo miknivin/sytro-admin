@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connection";
 import Product from "@/models/Products";
-import User from "@/models/User";
-
-export async function GET(req, { params }) {
+export async function DELETE(req, { params }) {
   try {
     await dbConnect();
 
@@ -16,26 +14,23 @@ export async function GET(req, { params }) {
       );
     }
 
-    const productById = await Product.findById(productId)
-      .populate({
-        path: "reviews.user",
-        select: "name email avatar", // Select only the fields you need
-      })
-      .populate({
-        path: "user",
-        select: "name email avatar",
-      });
+    const product = await Product.findById(productId);
 
-    if (!productById) {
+    if (!product) {
       return NextResponse.json(
         { success: false, message: "Product not found" },
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ success: true, productById }, { status: 200 });
+    await Product.findByIdAndDelete(productId);
+
+    return NextResponse.json(
+      { success: true, message: "Product deleted successfully" },
+      { status: 200 },
+    );
   } catch (error) {
-    console.error("Error fetching product:", error);
+    console.error("Error deleting product:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 },

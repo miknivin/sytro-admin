@@ -44,12 +44,12 @@ export const orderApi = createApi({
           body,
         };
       },
-      invalidatesTags: ["Order"], // ✅ Matches tagTypes
+      invalidatesTags: ["Order"], 
     }),
     deleteOrder: builder.mutation({
       query(id) {
         return {
-          url: `/admin/orders/${id}`,
+          url: `/orders/delete/${id}`,
           method: "DELETE",
         };
       },
