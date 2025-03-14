@@ -26,7 +26,12 @@ export default function ReusableAlert({
 
   return (
     <>
-      <dialog id="my_modal_1" className="modal" open={isOpen}>
+      <dialog
+        id="my_modal_1"
+        className="!dark:bg-gray-900/70 modal !bg-gray-100/70"
+        style={{ background: "rgba(0,0,0,0.7)" }}
+        open={isOpen}
+      >
         <div className="modal-box rounded-lg bg-black p-7 dark:bg-gray-50">
           <h3 className="text-lg font-bold">{title}</h3>
           <p className="py-4">{content}</p>

@@ -1,13 +1,13 @@
- 
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const MONGODB_URI =   process.env.NODE_ENV === "development"
-? process.env.MONGODB_URI
-: process.env.MONGODBLIVE_URI;
+const MONGODB_URI =
+  process.env.NODE_ENV === "development"
+    ? process.env.MONGODB_URI
+    : process.env.MONGODBLIVE_URI;
 
 if (!MONGODB_URI) {
   throw new Error(
-    'Please define the MONGODB_URI environment variable inside .env.local'
+    "Please define the MONGODB_URI environment variable inside .env.local",
   );
 }
 
@@ -23,8 +23,6 @@ async function dbConnect() {
   }
 
   if (!cached.promise) {
-
-
     cached.promise = mongoose.connect(MONGODB_URI).then((mongoose) => {
       return mongoose;
     });
