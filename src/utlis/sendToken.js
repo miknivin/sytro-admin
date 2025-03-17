@@ -8,7 +8,7 @@ const sendToken = (user, statusCode) => {
     httpOnly: true,
     maxAge: process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60, // in seconds
     path: "/",
-    secure: process.env.NODE_ENV === "PRODUCTION",
+    secure: process.env.NODE_ENV === "production",
   };
 
   // Create the response
