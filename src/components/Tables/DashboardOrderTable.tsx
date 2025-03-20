@@ -28,10 +28,13 @@ const DashboardOrderTable = ({ limit }: OrderTableProps) => {
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <div className="flex justify-between">
-        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
+      <div className="my-3 flex items-center justify-between">
+        <h4 className=" text-xl font-semibold text-black dark:text-white">
           Latest Orders
         </h4>
+        <Link href={"/users"} className="btn-soft btn me-3">
+          View orders
+        </Link>
       </div>
 
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg">

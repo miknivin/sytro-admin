@@ -12,14 +12,20 @@ const ChatCard = () => {
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
-      <h4 className="mb-6 px-7.5 text-xl font-semibold text-black dark:text-white">
-        Latest Users
-      </h4>
+      <div className="my-3 flex items-center justify-between">
+        <h4 className="px-7.5 text-xl font-semibold text-black dark:text-white">
+          Latest Users
+        </h4>
+        <div>
+          <Link href={"/users"} className="btn-soft btn me-3">
+            View users
+          </Link>
+        </div>
+      </div>
 
       <div>
         {data?.users.slice(0, 5)?.map((user: User) => (
-          <Link
-            href={`/userProfile/${user._id}`} // Adjust the profile link as needed
+          <div
             className="flex items-center gap-5 px-7.5 py-3 hover:bg-gray-3 dark:hover:bg-meta-4"
             key={user._id}
           >
@@ -52,7 +58,7 @@ const ChatCard = () => {
                 </p>
               </div>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </div>
