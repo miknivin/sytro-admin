@@ -48,6 +48,10 @@ const orderSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        uploadedImage: {
+          type: String,
+          required: true,
+        },
         quantity: {
           type: Number,
           required: true,
@@ -57,10 +61,6 @@ const orderSchema = new mongoose.Schema(
           required: true,
         },
         price: {
-          type: String,
-          required: true,
-        },
-        uploadedImage: {
           type: String,
           required: true,
         },
@@ -106,6 +106,14 @@ const orderSchema = new mongoose.Schema(
         values: ["Processing", "Shipped", "Delivered"],
         message: "Please select valid order status",
       },
+    },
+    shiprocketOrderId: {
+      type: String,
+      required: false,
+    },
+    orderNotes: {
+      type: String,
+      required: false,
     },
     deliveredAt: Date,
   },

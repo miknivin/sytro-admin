@@ -13,9 +13,9 @@ export interface OrderItem {
   name: string;
   quantity: number;
   image: string;
-  price: string;
-  product: Types.ObjectId;
-  uploadedImage:string
+  price: number;
+  product: string | Types.ObjectId;
+  uploadedImage: string;
 }
 
 export interface PaymentInfo {
@@ -26,7 +26,7 @@ export interface PaymentInfo {
 export interface Order {
   _id: string;
   shippingInfo: ShippingInfo;
-  user: Types.ObjectId;
+  user: Types.ObjectId | string;
   orderItems: OrderItem[];
   paymentMethod: "COD" | "Online";
   paymentInfo?: PaymentInfo;
@@ -37,5 +37,5 @@ export interface Order {
   orderStatus: "Processing" | "Shipped" | "Delivered";
   deliveredAt?: Date;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }

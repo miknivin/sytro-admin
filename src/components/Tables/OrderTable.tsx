@@ -126,6 +126,12 @@ const OrderTable = () => {
             <option value="20">20</option>
             <option value="50">50</option>
           </select>
+          {/* <Link
+            href={"/orders/add-orders"}
+            className="btn-outline rounded border border-primary bg-transparent px-4 py-2 text-sm text-white hover:bg-primary hover:bg-primary/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+          >
+            Add order
+          </Link> */}
           <button
             onClick={exportToCSV}
             className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary/70 focus:outline-none focus:ring-2 focus:ring-primary/50"
