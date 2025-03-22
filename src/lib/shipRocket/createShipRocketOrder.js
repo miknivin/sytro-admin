@@ -6,7 +6,7 @@ import https from "https";
 export async function createShiprocketOrder(orderData) {
   try {
     const token = await getShiprocketToken();
-    console.log(token, "token");
+    //console.log(token, "token");
 
     const response = await axios.post(
       "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",

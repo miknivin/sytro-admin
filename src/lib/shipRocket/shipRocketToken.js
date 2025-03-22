@@ -2,7 +2,7 @@
 import axios from "axios";
 import https from "https";
 import dbConnect from "../db/connection";
-import ShipRocketToken from "@/models/ShipRocketToken";
+import ShipRocketToken from "../../models/ShiprocketToken";
 
 let cachedToken = null;
 let cachedTokenExpiry = null;
@@ -18,7 +18,7 @@ async function loginToShiprocket() {
     {
       headers: { "Content-Type": "application/json" },
       httpsAgent: agent,
-    }
+    },
   );
   if (!response.data.token) throw new Error("Failed to login to Shiprocket");
   return {
