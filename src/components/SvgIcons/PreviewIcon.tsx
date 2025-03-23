@@ -2,7 +2,7 @@ export default function PreviewIcon() {
   return (
     <>
       <svg
-        className="h-6 w-6 text-gray-800 dark:text-white"
+        className="h-6 w-6 "
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width={24}

@@ -42,6 +42,20 @@ const TableThree = () => {
     return <p>Failed to load products.</p>;
   }
 
+  // Check if no products are found
+  if (!data?.allProducts || data.allProducts.length === 0) {
+    return (
+      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
+          Products
+        </h4>
+        <p className="text-center text-gray-500 dark:text-gray-400">
+          No products found.
+        </p>
+      </div>
+    );
+  }
+
   const openUploadModal = () => setIsUploadModalOpen(true);
   const closeUploadModal = () => setIsUploadModalOpen(false);
 
@@ -130,19 +144,19 @@ const TableThree = () => {
                 <td className="flex flex-wrap gap-3 border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <button
                     onClick={() => openImagesModal(product)}
-                    className="btn bg-primary p-3 hover:bg-primary/80"
+                    className="btn border-none bg-primary p-3 text-gray-200 hover:bg-primary/80"
                   >
                     <ImagesIcon />
                   </button>
                   <Link
                     href={`products/update-product/${product._id}`}
-                    className="btn bg-primary p-3 hover:bg-primary/80"
+                    className="btn border-none bg-primary p-3 text-gray-200 hover:bg-primary/80"
                   >
                     <PreviewIcon />
                   </Link>
                   <button
                     onClick={() => openDeleteModal(product)}
-                    className="btn bg-red-600 p-3 text-gray-600 hover:bg-red-600/80 dark:text-gray-200"
+                    className="btn !border-none bg-red-600 p-3  text-gray-200 hover:bg-red-600/80"
                   >
                     {isDeleting ? <Spinner /> : <DeleteIcon />}
                   </button>

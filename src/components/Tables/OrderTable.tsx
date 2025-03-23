@@ -108,11 +108,35 @@ const OrderTable = () => {
     }
   };
 
+  if (!data?.orders || data.orders.length === 0) {
+    return (
+      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
+            Orders
+          </h4>
+          <div className="flex items-center justify-end gap-4">
+            {/* <Link
+              href={"/orders/add-orders"}
+              className="btn-outline rounded border border-primary bg-transparent px-4 py-2 text-sm text-white hover:bg-primary hover:bg-primary/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+            >
+              Add order
+            </Link> */}
+          </div>
+        </div>
+
+        <p className="text-center text-gray-500 dark:text-gray-400">
+          No orders found.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <h4 className="text-xl font-semibold text-black dark:text-white">
-          Latest Orders
+          Orders
         </h4>
         <div className="flex items-center justify-end gap-4">
           <select
@@ -194,13 +218,13 @@ const OrderTable = () => {
                   <div className="flex flex-wrap justify-center gap-3">
                     <Link
                       href={`/orderDetails/${order._id}`}
-                      className="btn bg-primary p-3 hover:bg-primary/80"
+                      className="btn border-none bg-primary p-3 text-gray-200 hover:bg-primary/80"
                     >
                       <PreviewIcon />
                     </Link>
                     <button
                       onClick={() => openDeleteModal(order)}
-                      className="btn bg-red-600 p-3 text-gray-600 hover:bg-red-600/80 dark:text-gray-200"
+                      className="btn border-none bg-red-600 p-3  text-gray-200 hover:bg-red-600/80"
                     >
                       <DeleteIcon />
                     </button>

@@ -24,6 +24,7 @@ const UserTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const loginedUser = useSelector((state: any) => state.auth.user);
+
   const openEditModal = (id: string) => {
     setCurrentUserId(id);
     setIsEditModalOpen(true);
@@ -62,14 +63,28 @@ const UserTable = () => {
     return <p className="text-center text-danger">Failed to load users.</p>;
   }
 
-  // Calculate paginated data
-  const totalItems = data?.users?.length || 0;
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+  // Check if no users are found after filtering
   const allUsers = data?.users || [];
   const filteredUsers = allUsers.filter(
     (user: User) => user._id !== loginedUser?._id,
   );
+  if (filteredUsers.length === 0) {
+    return (
+      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
+          Users
+        </h4>
+        <p className="text-center text-gray-500 dark:text-gray-400">
+          No users found.
+        </p>
+      </div>
+    );
+  }
+
+  // Calculate paginated data
+  const totalItems = filteredUsers.length;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
   const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
@@ -165,16 +180,16 @@ const UserTable = () => {
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <p className="text-black dark:text-white">{user.role}</p>
                 </td>
-                <td className="flex gap-5 border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                <td className="flex gap-5 px-4 py-5 ">
                   <button
                     onClick={() => openEditModal(user._id || "")}
-                    className="hover:text-primary"
+                    className="btn border-none bg-primary p-3 hover:bg-primary/80"
                   >
                     <EditIcon />
                   </button>
                   <button
                     onClick={() => openDeleteModal(user || "")}
-                    className="stroke-danger text-danger"
+                    className="btn bg-danger hover:bg-danger/80 border-none dark:text-gray-200"
                     disabled={isDeleting}
                   >
                     {isDeleting ? <GraySpinner /> : <DeleteIcon />}

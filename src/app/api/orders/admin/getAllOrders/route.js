@@ -21,11 +21,15 @@ export async function GET(req) {
     // Fetch all orders sorted by latest first
     const orders = await Order.find().sort({ createdAt: -1 });
 
-    if (!orders || orders.length === 0) {
+    if (!orders) {
       return NextResponse.json(
         { success: false, message: "No orders found" },
         { status: 404 },
       );
+    }
+
+    if (orders.length === 0) {
+      return NextResponse.json({ success: true, orders: [] }, { status: 200 });
     }
 
     return NextResponse.json({ success: true, orders }, { status: 200 });
