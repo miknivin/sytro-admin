@@ -44,7 +44,7 @@ export const orderApi = createApi({
           body,
         };
       },
-      invalidatesTags: ["Order"], 
+      invalidatesTags: ["Order"],
     }),
     deleteOrder: builder.mutation({
       query(id) {
@@ -108,6 +108,12 @@ export const orderApi = createApi({
       },
       invalidatesTags: ["Coupons"],
     }),
+    sessionStartedOrders: builder.query({
+      query: () => "/orders/session-started",
+    }),
+    getSessionStartedOrderById: builder.query({
+      query: (id) => `orders/session-started/${id}`,
+    }),
   }),
 });
 
@@ -125,4 +131,6 @@ export const {
   useDeleteCouponMutation,
   useCheckCouponMutation,
   useApplyCouponMutation,
+  useSessionStartedOrdersQuery,
+  useGetSessionStartedOrderByIdQuery,
 } = orderApi;

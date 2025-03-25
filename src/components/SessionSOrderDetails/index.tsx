@@ -1,42 +1,45 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import OrderHeader from "./OrderHeader";
-import ProductItem from "./ProductItem";
-import OrderSummary from "./OrderSummary";
-import ShippingDetails from "./ShippingDetails";
-import CustomerDetails from "./CustomerDetails";
-import { useOrderDetailsQuery } from "@/redux/api/orderApi";
+import { useGetSessionStartedOrderByIdQuery } from "@/redux/api/orderApi";
 import Spinner from "../common/Spinner";
-import { Order } from "@/types/order";
+import { SessionStartedOrder } from "@/types/sessionStartedOrder";
 import { formatDate } from "./../../utlis/formatDate";
 import Link from "next/link";
+import CustomerDetails from "../OrderDetails/CustomerDetails";
+import ShippingDetails from "../OrderDetails/ShippingDetails";
+import ProductItem from "./ProductItem";
+import OrderSummary from "./OrderSummary";
 
 interface OrderDetailsProps {
   orderId: string;
 }
 
 export default function OrderDetails({ orderId }: OrderDetailsProps) {
-  
-  const { data, error, isLoading } = useOrderDetailsQuery(orderId);
-  const [orderDetails, setOrderDetails] = useState<Order | null>(null);
+  const { data, error, isLoading } =
+    useGetSessionStartedOrderByIdQuery(orderId);
+  const [orderDetails, setOrderDetails] = useState<SessionStartedOrder | null>(
+    null,
+  );
 
   useEffect(() => {
     if (data) {
-      setOrderDetails(data.order);
-      //console.log("Order Details:", data);
+      setOrderDetails(data); // Changed from data.order to data since our API returns the order directly
+      console.log("Session Started Order Details:", data);
     }
   }, [data]);
 
   useEffect(() => {
-    console.log("Order ID:", orderId); // Log the orderId
+    console.log("Order ID:", orderId);
   }, [orderId]);
 
   if (isLoading) {
     return <Spinner />;
   }
 
-  if (!orderDetails) {
-    return <p>Error fetching details</p>;
+  if (error || !orderDetails) {
+    return <p>Error fetching session started order details</p>;
   }
 
   return (
@@ -44,17 +47,17 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
       <div className="mb-4">
         <Link
           href="/orders"
-          className=" me-2 rounded-lg bg-gray-800 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+          className="me-2 rounded-lg bg-gray-800 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
         >
           Go back
         </Link>
       </div>
 
       <OrderHeader
-        orderNumber={orderDetails._id.slice(-6)}
+        orderNumber={orderDetails.razorpayOrderId.slice(-6)} // Changed to use razorpayOrderId
         orderDate={formatDate(orderDetails.createdAt)}
         orderId={orderDetails._id}
-        orderStatus={orderDetails.orderStatus}
+        orderStatus={orderDetails.razorpayPaymentStatus} // Changed to use razorpayPaymentStatus
       />
       <div className="mt-10 flex w-full flex-col items-stretch justify-center space-y-4 md:space-y-6 xl:flex-row xl:space-x-8 xl:space-y-0">
         <div className="flex w-full flex-col items-start justify-start space-y-4 md:space-y-6 xl:space-y-8">
@@ -68,7 +71,8 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
           </div>
           <div className="flex w-full flex-col items-stretch justify-center space-y-4 md:flex-row md:space-x-6 md:space-y-0 xl:space-x-8">
             <OrderSummary order={orderDetails} />
-            {/* <ShippingDetails shippingInfo={orderDetails.shippingInfo} /> */}
+            {/* <ShippingDetails shippingInfo={orderDetails.shippingInfo} />{" "} */}
+            {/* Uncommented this */}
           </div>
         </div>
         <CustomerDetails customer={orderDetails.shippingInfo} />
