@@ -110,9 +110,29 @@ export const orderApi = createApi({
     }),
     sessionStartedOrders: builder.query({
       query: () => "/orders/session-started",
+      providesTags: ["SessionStartedOrder"],
     }),
     getSessionStartedOrderById: builder.query({
       query: (id) => `orders/session-started/${id}`,
+      providesTags: ["SessionStartedOrder"],
+    }),
+    convertSessionOrder: builder.mutation({
+      query: (sessionOrderId) => ({
+        url: "orders/session-to-order",
+        method: "POST",
+        body: { sessionOrderId },
+      }),
+      invalidatesTags: ["Order", "SessionStartedOrder", "AdminOrders"], // Adjust based on your needs
+      transformResponse: (response) => response.order, // Return just the order object
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          // Handle successful conversion if needed
+          // console.log("Order converted successfully:", data);
+        } catch (error) {
+          console.error("Error converting order:", error);
+        }
+      },
     }),
   }),
 });
@@ -132,5 +152,6 @@ export const {
   useCheckCouponMutation,
   useApplyCouponMutation,
   useSessionStartedOrdersQuery,
+  useConvertSessionOrderMutation,
   useGetSessionStartedOrderByIdQuery,
 } = orderApi;

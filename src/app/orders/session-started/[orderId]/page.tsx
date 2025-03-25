@@ -10,7 +10,7 @@ interface OrderPageProps {
 
 const SessionStarted: React.FC<OrderPageProps> = ({ params }) => {
   const { orderId } = params;
-  console.log(orderId, "orderId");
+  // console.log(orderId, "orderId");
 
   return (
     <DefaultLayout>
