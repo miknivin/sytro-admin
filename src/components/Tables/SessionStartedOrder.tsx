@@ -9,19 +9,19 @@ const SessionStartedOrders = () => {
   const { data, isLoading, isError } = useSessionStartedOrdersQuery(null);
 
   // Function to check if two shippingInfo objects are equal
-  const isShippingInfoEqual = (shipping1?: any, shipping2?: any): boolean => {
-    if (!shipping1 || !shipping2) return false;
-    return (
-      shipping1.fullName === shipping2.fullName &&
-      shipping1.address === shipping2.address &&
-      shipping1.email === shipping2.email &&
-      shipping1.state === shipping2.state &&
-      shipping1.city === shipping2.city &&
-      shipping1.phoneNo === shipping2.phoneNo &&
-      shipping1.zipCode === shipping2.zipCode &&
-      shipping1.country === shipping2.country
-    );
-  };
+  // const isShippingInfoEqual = (shipping1?: any, shipping2?: any): boolean => {
+  //   if (!shipping1 || !shipping2) return false;
+  //   return (
+  //     shipping1.fullName === shipping2.fullName &&
+  //     shipping1.address === shipping2.address &&
+  //     shipping1.email === shipping2.email &&
+  //     shipping1.state === shipping2.state &&
+  //     shipping1.city === shipping2.city &&
+  //     shipping1.phoneNo === shipping2.phoneNo &&
+  //     shipping1.zipCode === shipping2.zipCode &&
+  //     shipping1.country === shipping2.country
+  //   );
+  // };
 
   // Function to remove duplicates based on shippingInfo and user
   const removeDuplicates = (
