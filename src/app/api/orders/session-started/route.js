@@ -44,11 +44,19 @@ export async function GET(request) {
       );
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: filteredSessionOrders,
       total: filteredSessionOrders.length,
     });
+
+    response.headers.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate",
+    );
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    return response;
   } catch (error) {
     return NextResponse.json(
       { error: "Internal Server Error", message: error.message },
