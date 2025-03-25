@@ -30,13 +30,6 @@ export async function GET(request) {
       );
     };
 
-    response.headers.set(
-      "Cache-Control",
-      "no-store, no-cache, must-revalidate, proxy-revalidate",
-    );
-    response.headers.set("Pragma", "no-cache");
-    response.headers.set("Expires", "0");
-
     // Filter out SessionStartedOrders that have matching shippingInfo with any Order
     const filteredSessionOrders = sessionOrders.filter((sessionOrder) => {
       return !orders.some((order) =>
@@ -44,18 +37,21 @@ export async function GET(request) {
       );
     });
 
+    // Create response first, then set headers
     const response = NextResponse.json({
       success: true,
       data: filteredSessionOrders,
       total: filteredSessionOrders.length,
     });
 
+    // Set cache-control headers after creating response
     response.headers.set(
       "Cache-Control",
       "no-store, no-cache, must-revalidate, proxy-revalidate",
     );
     response.headers.set("Pragma", "no-cache");
     response.headers.set("Expires", "0");
+
     return response;
   } catch (error) {
     return NextResponse.json(
@@ -64,3 +60,6 @@ export async function GET(request) {
     );
   }
 }
+
+// Optional: Ensure dynamic rendering
+export const dynamic = "force-dynamic";
