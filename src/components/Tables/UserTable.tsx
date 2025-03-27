@@ -7,12 +7,13 @@ import {
 import { User } from "@/types/user";
 import EditIcon from "../SvgIcons/EditIcon";
 import DeleteIcon from "../SvgIcons/DeleteIcon";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import UserEditModal from "../Modals/UserEditModal";
 import PaginationComponent from "@/utlis/pagination/PaginationComponent";
 import ReusableAlert from "@/utlis/alerts/ReusableAlert";
 import GraySpinner from "../common/GraySpinner";
 import { useSelector } from "react-redux";
+import SearchInput from "@/utlis/search/SearchInput";
 
 const UserTable = () => {
   const { data, isLoading, isError } = useGetAdminUsersQuery({});
@@ -23,7 +24,40 @@ const UserTable = () => {
   const [toBeDeletedUser, setToBeDeletedUser] = useState<User | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
   const loginedUser = useSelector((state: any) => state.auth.user);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const filteredUsers = useMemo(() => {
+    let users = data?.users || [];
+
+    users = users.filter((user: User) => user._id !== loginedUser?._id);
+
+    if (!searchQuery) return users;
+
+    const queryLower = searchQuery.toLowerCase();
+    return users.filter((user: User) => {
+      const userId = (user._id || "").toLowerCase();
+      const name = (user.name || "").toLowerCase();
+      const email = (user.email || "").toLowerCase();
+      const role = (user.role || "").toLowerCase();
+      return (
+        userId.includes(queryLower) ||
+        name.includes(queryLower) ||
+        email.includes(queryLower) ||
+        role.includes(queryLower)
+      );
+    });
+  }, [data?.users, loginedUser?._id, searchQuery]);
+
+  const totalItems = filteredUsers.length;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
 
   const openEditModal = (id: string) => {
     setCurrentUserId(id);
@@ -55,38 +89,6 @@ const UserTable = () => {
     }
   };
 
-  if (isLoading) {
-    return <Spinner />;
-  }
-
-  if (isError) {
-    return <p className="text-center text-danger">Failed to load users.</p>;
-  }
-
-  // Check if no users are found after filtering
-  const allUsers = data?.users || [];
-  const filteredUsers = allUsers.filter(
-    (user: User) => user._id !== loginedUser?._id,
-  );
-  if (filteredUsers.length === 0) {
-    return (
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-          Users
-        </h4>
-        <p className="text-center text-gray-500 dark:text-gray-400">
-          No users found.
-        </p>
-      </div>
-    );
-  }
-
-  // Calculate paginated data
-  const totalItems = filteredUsers.length;
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -95,6 +97,14 @@ const UserTable = () => {
     setItemsPerPage(value);
     setCurrentPage(1);
   };
+
+  if (isLoading) {
+    return <Spinner />;
+  }
+
+  if (isError) {
+    return <p className="text-center text-danger">Failed to load users.</p>;
+  }
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -113,11 +123,18 @@ const UserTable = () => {
           onClose={closeDeleteModal}
         />
       )}
-
+      <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark xl:pb-1">
+        <div className="gap-4">
+          <h4 className="mb-2 text-xl font-semibold text-black dark:text-white">
+            Users
+          </h4>
+        </div>
+      </div>
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <h4 className="text-xl font-semibold text-black dark:text-white">
-          Users
-        </h4>
+        <SearchInput
+          placeholder="Search by name, email, ID, or role..."
+          onSearch={handleSearch}
+        />
         <div className="flex items-center justify-end gap-4">
           <select
             defaultValue="10"
@@ -180,7 +197,7 @@ const UserTable = () => {
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <p className="text-black dark:text-white">{user.role}</p>
                 </td>
-                <td className="flex gap-5 px-4 py-5 ">
+                <td className="flex gap-5 px-4 py-5">
                   <button
                     onClick={() => openEditModal(user._id || "")}
                     className="btn border-none bg-primary p-3 hover:bg-primary/80"
@@ -188,8 +205,8 @@ const UserTable = () => {
                     <EditIcon />
                   </button>
                   <button
-                    onClick={() => openDeleteModal(user || "")}
-                    className="btn bg-danger hover:bg-danger/80 border-none dark:text-gray-200"
+                    onClick={() => openDeleteModal(user)}
+                    className="btn border-none bg-danger hover:bg-danger/80 dark:text-gray-200"
                     disabled={isDeleting}
                   >
                     {isDeleting ? <GraySpinner /> : <DeleteIcon />}
@@ -199,6 +216,13 @@ const UserTable = () => {
             ))}
           </tbody>
         </table>
+        {(!filteredUsers || filteredUsers.length === 0) && (
+          <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              {searchQuery ? "No users match your search." : "No users found."}
+            </p>
+          </div>
+        )}
       </div>
 
       <PaginationComponent

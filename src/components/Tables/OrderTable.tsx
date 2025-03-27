@@ -6,15 +6,17 @@ import {
 } from "@/redux/api/orderApi";
 import { Order } from "@/types/order";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Parser } from "json2csv";
 import PaginationComponent from "@/utlis/pagination/PaginationComponent";
 import PreviewIcon from "../SvgIcons/PreviewIcon";
 import DeleteIcon from "../SvgIcons/DeleteIcon";
 import ReusableAlert from "@/utlis/alerts/ReusableAlert";
 import toast from "react-hot-toast";
+import SearchInput from "@/utlis/search/SearchInput";
 
 const OrderTable = () => {
+  // Define all hooks at the top
   const { data, isLoading, isError } = useGetAdminOrdersQuery(null);
   const [deleteOrder, { isLoading: isDeleting }] = useDeleteOrderMutation();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -22,20 +24,35 @@ const OrderTable = () => {
   const [itemsPerPage, setItemsPerPage] = useState(8);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  if (isLoading) {
-    return <p>Loading orders...</p>;
-  }
+  // Handle search input
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page on search
+  };
 
-  if (isError) {
-    return <p>Error loading orders.</p>;
-  }
+  // Filter orders based on search query
+  const filteredOrders = useMemo(() => {
+    if (!data?.orders || !searchQuery) return data?.orders || [];
+    const queryLower = searchQuery.toLowerCase();
+    return data.orders.filter((order: Order) => {
+      const orderId = order._id.toLowerCase();
+      const fullName = order.shippingInfo.fullName?.toLowerCase() || "";
+      const phoneNo = order.shippingInfo.phoneNo.toLowerCase() || "";
+      return (
+        orderId.includes(queryLower) ||
+        fullName.includes(queryLower) ||
+        phoneNo.includes(queryLower)
+      );
+    });
+  }, [data?.orders, searchQuery]);
 
-  // Calculate paginated data
-  const totalItems = data.orders?.length || 0;
+  // Calculate paginated data from filtered orders
+  const totalItems = filteredOrders.length;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedOrders = data.orders?.slice(startIndex, endIndex);
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -44,7 +61,7 @@ const OrderTable = () => {
 
   // Export to CSV
   const exportToCSV = () => {
-    if (!data.orders || data.orders.length === 0) {
+    if (!filteredOrders || filteredOrders.length === 0) {
       alert("No orders available to export!");
       return;
     }
@@ -68,7 +85,7 @@ const OrderTable = () => {
     ];
 
     const parser = new Parser({ fields });
-    const csv = parser.parse(data.orders);
+    const csv = parser.parse(filteredOrders);
 
     const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
@@ -108,54 +125,41 @@ const OrderTable = () => {
     }
   };
 
-  if (!data?.orders || data.orders.length === 0) {
-    return (
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-            Orders
-          </h4>
-          <div className="flex items-center justify-end gap-4">
-            {/* <Link
-              href={"/orders/add-orders"}
-              className="btn-outline rounded border border-primary bg-transparent px-4 py-2 text-sm text-white hover:bg-primary hover:bg-primary/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-            >
-              Add order
-            </Link> */}
-          </div>
-        </div>
+  // Early returns after hooks
+  if (isLoading) {
+    return <p>Loading orders...</p>;
+  }
 
-        <p className="text-center text-gray-500 dark:text-gray-400">
-          No orders found.
-        </p>
-      </div>
-    );
+  if (isError) {
+    return <p>Error loading orders.</p>;
   }
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+      <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark xl:pb-1">
+        <div className="gap-4">
+          <h4 className="mb-2 text-xl font-semibold text-black dark:text-white">
+            Orders
+          </h4>
+        </div>
+      </div>
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <h4 className="text-xl font-semibold text-black dark:text-white">
-          Orders
-        </h4>
+        <SearchInput
+          placeholder="Search by name, order ID, phone..."
+          onSearch={handleSearch}
+        />
         <div className="flex items-center justify-end gap-4">
           <select
-            defaultValue="10"
+            defaultValue="8"
             onChange={(e) => setItemsPerPage(Number(e.target.value))}
             className="select rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
           >
             <option disabled={true}>Select items per page</option>
             <option value="5">5</option>
-            <option value="10">10</option>
+            <option value="8">8</option>
             <option value="20">20</option>
             <option value="50">50</option>
           </select>
-          {/* <Link
-            href={"/orders/add-orders"}
-            className="btn-outline rounded border border-primary bg-transparent px-4 py-2 text-sm text-white hover:bg-primary hover:bg-primary/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-          >
-            Add order
-          </Link> */}
           <button
             onClick={exportToCSV}
             className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary/70 focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -203,7 +207,7 @@ const OrderTable = () => {
                   {order._id.slice(-6)}
                 </th>
                 <td className="px-6 py-4 text-center">
-                  {order.shippingInfo.fullName}
+                  {order.shippingInfo.fullName || "N/A"}
                 </td>
                 <td className="px-6 py-4 text-center">₹{order.totalAmount}</td>
                 <td className="px-6 py-4 text-center">{order.orderStatus}</td>
@@ -224,7 +228,8 @@ const OrderTable = () => {
                     </Link>
                     <button
                       onClick={() => openDeleteModal(order)}
-                      className="btn border-none bg-red-600 p-3  text-gray-200 hover:bg-red-600/80"
+                      className="btn border-none bg-red-600 p-3 text-gray-200 hover:bg-red-600/80"
+                      disabled={isDeleting}
                     >
                       <DeleteIcon />
                     </button>
@@ -234,6 +239,15 @@ const OrderTable = () => {
             ))}
           </tbody>
         </table>
+        {(!filteredOrders || filteredOrders.length === 0) && (
+          <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              {searchQuery
+                ? "No orders match your search."
+                : "No orders found."}
+            </p>
+          </div>
+        )}
       </div>
 
       <PaginationComponent

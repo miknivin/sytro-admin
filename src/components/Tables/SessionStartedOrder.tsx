@@ -1,41 +1,105 @@
 "use client";
 
-import { useSessionStartedOrdersQuery } from "@/redux/api/orderApi";
+import {
+  useDeleteSessionOrderByIdMutation,
+  useSessionStartedOrdersQuery,
+} from "@/redux/api/orderApi";
 import { SessionStartedOrder } from "@/types/sessionStartedOrder";
 import Link from "next/link";
 import Spinner from "../common/Spinner";
+import PreviewIcon from "../SvgIcons/PreviewIcon";
+import DeleteIcon from "../SvgIcons/DeleteIcon";
+import { useState, useEffect, useMemo } from "react";
+import PaginationComponent from "@/utlis/pagination/PaginationComponent";
+import SearchInput from "@/utlis/search/SearchInput";
+import toast from "react-hot-toast";
+import ReusableAlert from "@/utlis/alerts/ReusableAlert";
+import ClickToCopy from "@/utlis/ClickToCopy/SimpleClickToCopy";
 
 const SessionStartedOrders = () => {
   const { data, isLoading, isError } = useSessionStartedOrdersQuery(null);
+  const [deleteOrder, { isLoading: isDeleting }] =
+    useDeleteSessionOrderByIdMutation();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentSession, setCurrentSession] = useState<
+    Partial<SessionStartedOrder>
+  >({});
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // Function to check if two shippingInfo objects are equal
-  // const isShippingInfoEqual = (shipping1?: any, shipping2?: any): boolean => {
-  //   if (!shipping1 || !shipping2) return false;
-  //   return (
-  //     shipping1.fullName === shipping2.fullName &&
-  //     shipping1.address === shipping2.address &&
-  //     shipping1.email === shipping2.email &&
-  //     shipping1.state === shipping2.state &&
-  //     shipping1.city === shipping2.city &&
-  //     shipping1.phoneNo === shipping2.phoneNo &&
-  //     shipping1.zipCode === shipping2.zipCode &&
-  //     shipping1.country === shipping2.country
-  //   );
-  // };
-
-  // Function to remove duplicates based on shippingInfo and user
   const removeDuplicates = (
     orders: SessionStartedOrder[],
   ): SessionStartedOrder[] => {
     const seen = new Set<string>();
     return orders.filter((order) => {
       const key = `${order.user.toString()}-${JSON.stringify(order.shippingInfo)}`;
-      if (seen.has(key)) {
-        return false;
-      }
+      if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteOrder(currentSession._id).unwrap();
+      toast.success("Session order deleted");
+    } catch (error) {
+      console.error("Failed to delete order:", error);
+    }
+  };
+
+  const openDeleteModal = (session: SessionStartedOrder) => {
+    setCurrentSession(session);
+    setIsDeleteModalOpen(true);
+  };
+  const closeDeleteModal = () => {
+    setCurrentSession({});
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page on search
+  };
+
+  // Get unique orders
+  const uniqueOrders = useMemo(() => {
+    return data?.data ? removeDuplicates(data.data) : [];
+  }, [data?.data]);
+
+  // Filter unique orders based on search query
+  const filteredOrders = useMemo(() => {
+    if (!searchQuery) return uniqueOrders; // No filter if query is empty
+    const queryLower = searchQuery.toLowerCase();
+    return uniqueOrders.filter((order) => {
+      const fullName = order.shippingInfo?.fullName?.toLowerCase() || "";
+      const orderId = order.razorpayOrderId?.toLowerCase() || "";
+      const mongoId = order._id.toString().toLowerCase();
+      return (
+        fullName.includes(queryLower) ||
+        orderId.includes(queryLower) ||
+        mongoId.includes(queryLower)
+      );
+    });
+  }, [uniqueOrders, searchQuery]);
+
+  // Update total items based on filtered orders
+  useEffect(() => {
+    setTotalItems(filteredOrders.length);
+  }, [filteredOrders]);
+
+  // Paginate filtered orders
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const paginatedOrders = filteredOrders.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   if (isLoading) {
@@ -50,31 +114,47 @@ const SessionStartedOrders = () => {
     return <p>Error loading session started orders.</p>;
   }
 
-  // Apply deduplication if data exists
-  const uniqueOrders = data?.data ? removeDuplicates(data.data) : [];
-
-  if (!uniqueOrders || uniqueOrders.length === 0) {
-    return (
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-          Session Started Orders
-        </h4>
-        <p className="text-center text-gray-500 dark:text-gray-400">
-          No session started orders found.
-        </p>
-      </div>
-    );
-  }
+  // if (!filteredOrders || filteredOrders.length === 0) {
+  //   return (
+  //     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+  //       <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
+  //         Session Started Orders
+  //       </h4>
+  //       <p className="text-center text-gray-500 dark:text-gray-400">
+  //         {searchQuery
+  //           ? "No session started orders match your search."
+  //           : "No session started orders found."}
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <div className="mb-3 flex items-center justify-between">
+      <div className="w-full">
         <h4 className="text-xl font-semibold text-black dark:text-white">
           Session Started Orders
         </h4>
       </div>
+      <div className="mb-3 flex items-center justify-between">
+        <SearchInput
+          placeholder="Search by name, order ID..."
+          onSearch={handleSearch}
+        />
+        <select
+          defaultValue="10"
+          onChange={(e) => setItemsPerPage(Number(e.target.value))}
+          className="select rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+        >
+          <option disabled={true}>Select items per page</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
 
-      <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <div className="relative shadow-md sm:rounded-lg">
         <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400 rtl:text-right">
           <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
             <tr>
@@ -88,7 +168,7 @@ const SessionStartedOrders = () => {
                 Total
               </th>
               <th scope="col" className="px-6 py-3 text-center">
-                Status
+                Razorpay order Id
               </th>
               <th scope="col" className="px-6 py-3 text-center">
                 Date
@@ -99,23 +179,24 @@ const SessionStartedOrders = () => {
             </tr>
           </thead>
           <tbody>
-            {uniqueOrders.map((order: SessionStartedOrder) => (
+            {paginatedOrders.map((order: SessionStartedOrder) => (
               <tr
-                key={order._id.toString()} // Convert to string for key
+                key={order._id.toString()}
                 className="border-b border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
               >
                 <th
                   scope="row"
                   className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
                 >
-                  {order.razorpayOrderId.slice(-6)}
+                  {order._id.slice(-6)}
                 </th>
                 <td className="px-6 py-4 text-center">
                   {order.shippingInfo.fullName || "N/A"}
                 </td>
                 <td className="px-6 py-4 text-center">₹{order.totalAmount}</td>
                 <td className="px-6 py-4 text-center">
-                  {order.razorpayPaymentStatus}
+                  {/* {order.razorpayOrderId || "N/A"} */}
+                  <ClickToCopy label={""} value={order.razorpayOrderId} />
                 </td>
                 <td className="px-6 py-4 text-center">
                   {new Date(order.createdAt).toLocaleDateString("en-GB", {
@@ -124,19 +205,55 @@ const SessionStartedOrders = () => {
                     year: "2-digit",
                   })}
                 </td>
-                <td className="px-6 py-4 text-center">
+                <td className="flex flex-wrap justify-center gap-3 border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <Link
                     href={`/orders/session-started/${order._id}`}
-                    className="btn"
+                    className="btn border-none bg-primary p-3 text-gray-200 hover:bg-primary/80"
                   >
-                    View
+                    <PreviewIcon />
                   </Link>
+                  <button
+                    onClick={() => {
+                      setIsDeleteModalOpen(true);
+                      setCurrentSession(order);
+                    }}
+                    disabled={isDeleting}
+                    className="btn !border-none bg-red-600 p-3 text-gray-200 hover:bg-red-600/80"
+                  >
+                    {isDeleting ? <Spinner /> : <DeleteIcon />}
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        {(!filteredOrders || filteredOrders.length === 0) && (
+          <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              {searchQuery
+                ? "No session started orders match your search."
+                : "No session started orders found."}
+            </p>
+          </div>
+        )}
       </div>
+
+      <PaginationComponent
+        currentPage={currentPage}
+        totalPages={Math.ceil(totalItems / itemsPerPage)}
+        onPageChange={handlePageChange}
+      />
+      {isDeleteModalOpen && currentSession && (
+        <ReusableAlert
+          title="Confirm Deletion"
+          content={`Are you sure you want to delete "${currentSession._id?.slice(-6)}"?`}
+          func={handleDelete}
+          isOpen={isDeleteModalOpen}
+          functionTitle={"Delete"}
+          buttonStyle={"bg-red-600"}
+          onClose={closeDeleteModal}
+        />
+      )}
     </div>
   );
 };

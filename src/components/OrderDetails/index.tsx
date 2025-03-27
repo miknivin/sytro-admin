@@ -27,9 +27,9 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
     }
   }, [data]);
 
-  useEffect(() => {
-    console.log("Order ID:", orderId); // Log the orderId
-  }, [orderId]);
+  // useEffect(() => {
+  //   console.log("Order ID:", orderId); // Log the orderId
+  // }, [orderId]);
 
   if (isLoading) {
     return <Spinner />;

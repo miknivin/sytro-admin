@@ -88,7 +88,8 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
       </div>
 
       <OrderHeader
-        orderNumber={orderDetails.razorpayOrderId.slice(-6)}
+        razorPayId={orderDetails.razorpayOrderId}
+        orderNumber={orderDetails._id.slice(-6)}
         orderDate={formatDate(orderDetails.createdAt)}
         orderId={orderDetails._id}
         orderStatus={orderDetails.razorpayPaymentStatus}

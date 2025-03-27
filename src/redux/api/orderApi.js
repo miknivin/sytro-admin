@@ -113,8 +113,17 @@ export const orderApi = createApi({
       providesTags: ["SessionStartedOrder"],
     }),
     getSessionStartedOrderById: builder.query({
-      query: (id) => `orders/session-started/${id}`,
+      query: (id) => `/orders/session-started/${id}`,
       providesTags: ["SessionStartedOrder"],
+    }),
+    deleteSessionOrderById: builder.mutation({
+      query(id) {
+        return {
+          url: `/orders/session-started/${id}`,
+          method: "DELETE",
+        };
+      },
+      invalidatesTags: ["SessionStartedOrder"],
     }),
     convertSessionOrder: builder.mutation({
       query: (sessionOrderId) => ({
@@ -154,4 +163,5 @@ export const {
   useSessionStartedOrdersQuery,
   useConvertSessionOrderMutation,
   useGetSessionStartedOrderByIdQuery,
+  useDeleteSessionOrderByIdMutation
 } = orderApi;
