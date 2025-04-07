@@ -130,7 +130,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Orders",
-        route: "",
+        route: "/orders",
         children: [
           { label: "Session-started", route: "/orders/session-started" },
           { label: "All Orders", route: "/orders" },

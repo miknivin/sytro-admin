@@ -15,7 +15,7 @@ export interface OrderItem {
   image: string;
   price: number;
   product: string | Types.ObjectId;
-  uploadedImage: string;
+  uploadedImage: string[];
 }
 
 export interface PaymentInfo {
@@ -34,6 +34,7 @@ export interface Order {
   taxAmount: number;
   shippingAmount: number;
   totalAmount: number;
+  orderNotes?:string;
   orderStatus: "Processing" | "Shipped" | "Delivered";
   deliveredAt?: Date;
   createdAt: Date;
