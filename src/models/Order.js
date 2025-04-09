@@ -99,6 +99,11 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    couponApplied: {
+      type: String,
+      required: false,
+      default: "No",
+    },
     orderStatus: {
       type: String,
       default: "Processing",

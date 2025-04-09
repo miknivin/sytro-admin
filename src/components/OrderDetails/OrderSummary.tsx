@@ -26,6 +26,7 @@ const OrderSummary: React.FC<{ order: Order }> = ({ order }) => {
             ₹{order.shippingAmount.toFixed(2)}
           </p>
         </div>
+
         <div className="flex w-full items-center justify-between">
           <p className="text-base leading-4 text-gray-800 dark:text-gray-100">
             Tax
@@ -34,6 +35,16 @@ const OrderSummary: React.FC<{ order: Order }> = ({ order }) => {
             ₹{order.taxAmount.toFixed(2)}
           </p>
         </div>
+        {order?.couponApplied !== "No" && (
+          <div className="flex w-full items-center justify-between">
+            <p className="text-base leading-4 text-gray-800 dark:text-gray-100">
+              Coupon Applied
+            </p>
+            <p className="text-base leading-4 text-gray-800 dark:text-gray-100">
+              {order?.couponApplied}
+            </p>
+          </div>
+        )}
       </div>
       <div className="flex w-full items-center justify-between border-b border-gray-200 pb-3 dark:border-gray-700">
         <p className="text-base font-semibold leading-4 text-gray-800 dark:text-gray-100">

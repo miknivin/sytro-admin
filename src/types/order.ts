@@ -34,9 +34,10 @@ export interface Order {
   taxAmount: number;
   shippingAmount: number;
   totalAmount: number;
-  orderNotes?:string;
+  orderNotes?: string;
   orderStatus: "Processing" | "Shipped" | "Delivered";
   deliveredAt?: Date;
+  couponApplied?: string;
   createdAt: Date;
   updatedAt?: Date;
 }
