@@ -40,6 +40,8 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
 
   useEffect(() => {
     if (data) {
+      console.log(data, "data");
+
       setOrderDetails(data);
     }
   }, [data]);

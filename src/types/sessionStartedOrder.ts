@@ -17,7 +17,7 @@ export interface ShippingInfo {
 // Interface for order items
 export interface OrderItem {
   name: string;
-  uploadedImage: string;
+  uploadedImage: string[];
   quantity: number;
   image: string;
   price: string;

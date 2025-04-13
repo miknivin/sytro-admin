@@ -28,7 +28,10 @@ const sessionStartedOrderSchema = new mongoose.Schema(
     orderItems: [
       {
         name: { type: String, required: true },
-        uploadedImage: { type: String, required: true },
+        uploadedImage: {
+          type: [String],
+          required: true,
+        },
         quantity: { type: Number, required: true },
         image: { type: String, required: true },
         price: { type: String, required: true },
@@ -48,10 +51,11 @@ const sessionStartedOrderSchema = new mongoose.Schema(
     orderNotes: { type: String, required: false },
     deliveredAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const SessionStartedOrder =
-  mongoose.models.SessionStartedOrder || mongoose.model("SessionStartedOrder", sessionStartedOrderSchema);
+  mongoose.models.SessionStartedOrder ||
+  mongoose.model("SessionStartedOrder", sessionStartedOrderSchema);
 
 export default SessionStartedOrder;

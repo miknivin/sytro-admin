@@ -1,6 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
-import { SessionStartedOrder, OrderItem } from "@/types/sessionStartedOrder";
-import React from "react";
+import { OrderItem } from "@/types/sessionStartedOrder";
+import React, { useRef, useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import Download from "../SvgIcons/Download";
+// Replace with your actual Download icon component
 
 interface ProductItemProps {
   product: OrderItem;
@@ -8,40 +15,77 @@ interface ProductItemProps {
 
 const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const { name, quantity, image, price, uploadedImage } = product;
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
 
   return (
     <div className="mt-4 flex w-full flex-col items-start justify-start md:mt-6 md:flex-row md:items-center md:space-x-6 xl:space-x-8">
       <div className="w-full pb-4 md:w-40 md:pb-8">
         <img className="hidden w-full md:block" src={image} alt={name} />
-        {/* <img
-          className="w-full md:hidden"
-          src={images.mobile}
-          alt={name}
-        /> */}
       </div>
       <div className="flex w-full flex-col items-start justify-between space-y-4 border-b border-gray-200 pb-8 dark:border-gray-700 md:flex-row md:space-y-0">
         <div className="flex w-full flex-col items-start justify-start space-y-8">
-          <h3 className="text-xl font-semibold leading-6 text-gray-800 dark:text-gray-100 xl:text-2xl">
-            {name} <br />
-            <a
-              className="text-sm text-blue-400 underline"
-              target="_blank"
-              href={uploadedImage}
+          <div className="dropdown relative mt-1" ref={dropdownRef}>
+            <div
+              role="button"
+              tabIndex={0}
+              className="btn"
+              onClick={toggleDropdown}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  toggleDropdown();
+                }
+              }}
             >
               Uploaded image
-            </a>
-          </h3>
-          {/* <div className="flex justify-start items-start flex-col space-y-2">
-            <p className="text-sm dark:text-gray-300 leading-none text-gray-800">
-              <span className="dark:text-gray-400 text-gray-300">Style: </span> {style}
-            </p>
-            <p className="text-sm dark:text-gray-300 leading-none text-gray-800">
-              <span className="dark:text-gray-400 text-gray-300">Size: </span> {size}
-            </p>
-            <p className="text-sm dark:text-gray-300 leading-none text-gray-800">
-              <span className="dark:text-gray-400 text-gray-300">Color: </span> {color}
-            </p>
-          </div> */}
+            </div>
+
+            {isOpen && (
+              <div
+                className="dropdown-content absolute z-[10] mt-2 w-56 rounded-box bg-base-100 p-2 shadow-lg"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {uploadedImage && uploadedImage.length > 0 ? (
+                  <div>
+                    <Swiper
+                      modules={[Navigation, Pagination]}
+                      spaceBetween={10}
+                      slidesPerView={1}
+                      navigation
+                      pagination={{ clickable: true }}
+                      className="my-4"
+                    >
+                      {uploadedImage.map((image: string, index: number) => (
+                        <SwiperSlide key={index}>
+                          <div className="relative">
+                            <img
+                              src={image}
+                              alt={`Slide ${index}`}
+                              className="h-36 w-36 object-contain"
+                            />
+                            <a
+                              href={image}
+                              download={`image-${index}`}
+                              className="absolute right-2 top-2 rounded-full bg-white p-1 shadow-md hover:bg-gray-100"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Download />
+                            </a>
+                          </div>
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                  </div>
+                ) : (
+                  <p className="p-2 text-gray-500">No uploaded images</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex w-full items-start justify-between space-x-8">
           <p className="text-base leading-6 xl:text-lg">₹{price}</p>
