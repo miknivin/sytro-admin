@@ -7,7 +7,7 @@ interface CustomerDetailsProps {
 }
 
 const CustomerDetails: React.FC<CustomerDetailsProps> = ({ customer }) => {
-  const { fullName, address, phoneNo, city, country } = customer;
+  const { fullName, address, phoneNo, city, country, zipCode } = customer;
 
   return (
     <div className="flex w-full flex-col items-center justify-between bg-gray-50 px-4 py-6 dark:bg-gray-800 md:items-start md:p-6 xl:w-96 xl:p-8">
@@ -57,6 +57,12 @@ const CustomerDetails: React.FC<CustomerDetailsProps> = ({ customer }) => {
               </p>
               <p className="w-48 text-center text-sm leading-5 text-gray-600 dark:text-gray-300 md:text-left lg:w-full xl:w-48">
                 {address}
+              </p>
+              <p className="text-center text-base font-semibold leading-4 text-gray-800 dark:text-gray-100 md:text-left">
+                Pin Code
+              </p>
+              <p className="w-48 text-center text-sm leading-5 text-gray-600 dark:text-gray-300 md:text-left lg:w-full xl:w-48">
+                {zipCode}
               </p>
               <p className="text-center text-base font-semibold leading-4 text-gray-800 dark:text-gray-100 md:text-left">
                 City
