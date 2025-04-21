@@ -86,6 +86,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
                             />
                             <a
                               href={image}
+                              target="_blank"
                               download={`image-${index}`}
                               className="absolute right-2 top-2 rounded-full bg-white p-1 shadow-md hover:bg-gray-100"
                               onClick={(e) => e.stopPropagation()}

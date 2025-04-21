@@ -5,7 +5,7 @@ import dbConnect from "@/lib/db/connection";
 export const isAuthenticatedUser = async (req) => {
   await dbConnect();
   const token = req.cookies.get("token")?.value;
-  console.log(token);
+  //console.log(token);
 
   if (!token) {
     throw new Error("You need to login to access this resource");
