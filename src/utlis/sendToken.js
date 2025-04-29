@@ -10,6 +10,7 @@ const sendToken = (user, statusCode) => {
     path: "/",
     secure: process.env.NODE_ENV === "production",
   };
+  console.log("token miss prank");
 
   // Create the response
   const response = NextResponse.json(
@@ -22,7 +23,7 @@ const sendToken = (user, statusCode) => {
         email: user.email,
       },
     },
-    { status: statusCode }
+    { status: statusCode },
   );
 
   // Set the cookie in the response headers
