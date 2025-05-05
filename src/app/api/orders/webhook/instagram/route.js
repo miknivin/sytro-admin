@@ -1,7 +1,9 @@
-
 import { NextResponse } from "next/server";
+import dbConnect from "@/lib/dbConnect"; // Adjust the path to your dbConnect file
+import Message from "../../../../../models/Message";
 
 export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
@@ -38,6 +40,9 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    // Connect to MongoDB
+    await dbConnect();
+
     const payload = await request.json();
     console.log("Raw payload:", JSON.stringify(payload, null, 2)); // Log full payload for debugging
 
@@ -56,6 +61,22 @@ export async function POST(request) {
 
             // Log the message to console
             console.log("Received DM:", JSON.stringify(messageData, null, 2));
+
+            // Save to MongoDB
+            try {
+              const existingMessage = await Message.findOne({
+                mid: messageData.mid,
+              });
+              if (!existingMessage) {
+                const newMessage = new Message(messageData);
+                await newMessage.save();
+                console.log("Message saved to MongoDB:", messageData.mid);
+              } else {
+                console.log("Duplicate message skipped:", messageData.mid);
+              }
+            } catch (dbError) {
+              console.error("Error saving message to MongoDB:", dbError);
+            }
           }
         }
       }
