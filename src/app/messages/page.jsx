@@ -12,7 +12,6 @@ async function getMessages(page = 1, limit = 10) {
       .skip(skip)
       .limit(limit)
       .lean(); // Convert to plain JavaScript objects
-    console.log(messages);
 
     // Transform messages to ensure all fields are serializable
     const serializedMessages = messages.map((message) => ({
@@ -24,7 +23,7 @@ async function getMessages(page = 1, limit = 10) {
     }));
 
     const totalMessages = await Message.countDocuments();
-    return { allMessages: serializedMessages, totalMessages };
+    return { allMessages: serializedMessages, totalMessages, error: null };
   } catch (error) {
     console.error("Error fetching messages:", error);
     return {
@@ -34,6 +33,7 @@ async function getMessages(page = 1, limit = 10) {
     };
   }
 }
+
 export default async function page({ searchParams }) {
   const page = parseInt(searchParams.page) || 1;
   const limit = parseInt(searchParams.limit) || 10;

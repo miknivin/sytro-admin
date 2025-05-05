@@ -1,9 +1,8 @@
-// components/MessagesTable.js
 "use client";
 import { useState } from "react";
-import Spinner from "@/components/common/Spinner"; // Adjust path
 import PaginationComponent from "@/utlis/pagination/PaginationComponent"; // Adjust path
 
+// Define the shape of a message object for better type safety
 const MessagesTable = ({ data, page, limit }: any) => {
   const [currentPage, setCurrentPage] = useState(page);
   const [itemsPerPage, setItemsPerPage] = useState(limit);
@@ -49,6 +48,12 @@ const MessagesTable = ({ data, page, limit }: any) => {
               <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">
                 Sender ID
               </th>
+              <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">
+                Recipient ID
+              </th>
+              <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
+                Event Type
+              </th>
               <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
                 Timestamp
               </th>
@@ -69,7 +74,20 @@ const MessagesTable = ({ data, page, limit }: any) => {
                 </td>
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <p className="text-black dark:text-white">
-                    {new Date(message.timestamp).toLocaleString()}
+                    {message.recipientId}
+                  </p>
+                </td>
+                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                  <p className="text-black dark:text-white">
+                    {message.eventType}
+                  </p>
+                </td>
+                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                  <p className="text-black dark:text-white">
+                    {new Date(message.timestamp).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
                   </p>
                 </td>
               </tr>
