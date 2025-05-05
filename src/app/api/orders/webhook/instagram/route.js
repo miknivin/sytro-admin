@@ -12,6 +12,7 @@ export async function GET(request) {
       throw new Error("Please define the VERIFY_TOKEN environment variable");
     }
 
+    // Extract query parameters from the URL
     const { searchParams } = new URL(request.url);
     const mode = searchParams.get("hub.mode");
     const token = searchParams.get("hub.verify_token");
@@ -50,12 +51,6 @@ export async function POST(request) {
         // Handle direct messages (messaging field)
         if (entry.messaging) {
           for (const messagingEvent of entry.messaging) {
-            // Skip echo messages if desired (optional)
-            if (messagingEvent.message?.is_echo) {
-              console.log("Skipping echo message:", messagingEvent.message.mid);
-              continue;
-            }
-
             const messageData = {
               senderId: messagingEvent.sender.id,
               recipientId: messagingEvent.recipient.id,
@@ -63,6 +58,7 @@ export async function POST(request) {
               message: messagingEvent.message.text || "No text content",
               mid: messagingEvent.message.mid,
               eventType: "message", // Add event type for clarity
+              isEcho: messagingEvent.message?.is_echo || false, // Track if the message is an echo
             };
 
             // Log the message to console
@@ -98,12 +94,13 @@ export async function POST(request) {
             }
 
             const messageData = {
-              senderId: messageValue.sender?.id || "unknown", // Sender ID might not always be available
-              recipientId: messageValue.recipient?.id || entry.id, // Use entry.id if recipient is not specified
+              senderId: messageValue.sender?.id || "unknown",
+              recipientId: messageValue.recipient?.id || entry.id,
               timestamp: new Date(parseInt(messageValue.timestamp) * 1000), // Timestamp in seconds, convert to milliseconds
               message: messageValue.message.text || "No text content",
-              mid: messageValue.message.mid || `change_${Date.now()}`, // Generate a unique mid if not provided
-              eventType: change.field || "unknown_event", // Store the type of event (e.g., "comments", "mentions")
+              mid: messageValue.message.mid || `change_${Date.now()}`,
+              eventType: change.field || "unknown_event",
+              isEcho: false, // Changes events are not echo messages
             };
 
             // Log the event to console
