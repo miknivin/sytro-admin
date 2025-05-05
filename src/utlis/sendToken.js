@@ -3,14 +3,13 @@ import { NextResponse } from "next/server";
 const sendToken = (user, statusCode) => {
   const token = user?.getJwtToken();
 
-  // Set cookie options
   const cookieOptions = {
     httpOnly: true,
     maxAge: process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60, // in seconds
     path: "/",
     secure: process.env.NODE_ENV === "production",
   };
-  console.log("token miss prank");
+  //console.log("token miss prank");
 
   // Create the response
   const response = NextResponse.json(
