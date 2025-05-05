@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect"; // Adjust the path to your dbConnect file
+
 import Message from "../../../../../models/Message";
+import dbConnect from "@/lib/db/connection";
 
 export const dynamic = "force-dynamic";
 
