@@ -41,6 +41,8 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     // Connect to MongoDB
+    console.log("webhook called");
+
     await dbConnect();
 
     const payload = await request.json();
