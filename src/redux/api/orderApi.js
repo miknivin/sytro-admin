@@ -5,9 +5,9 @@ export const orderApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
   }),
-  tagTypes: ["Order", "AdminOrders", "Coupons"], // ✅ Fix: Defined all used tags
+  tagTypes: ["Order", "AdminOrders", "Coupons", "SessionStartedOrder"], // ✅ Added SessionStartedOrder
   endpoints: (builder) => ({
-    createNewOrder: builder.mutation({
+    createNewOrder: builder.query({
       query(body) {
         return {
           url: "/order/new",
@@ -21,7 +21,7 @@ export const orderApi = createApi({
     }),
     orderDetails: builder.query({
       query: (id) => `/orders/${id}`,
-      providesTags: ["Order"], // ✅ Matches tagTypes
+      providesTags: ["Order"],
     }),
     stripeCheckoutSession: builder.mutation({
       query(body) {
@@ -112,6 +112,11 @@ export const orderApi = createApi({
       query: () => "/orders/session-started",
       providesTags: ["SessionStartedOrder"],
     }),
+    searchSessionStartedOrders: builder.query({
+      query: ({ keyword }) =>
+        `/orders/session-started/search?keyword=${encodeURIComponent(keyword)}`, // ✅ Fixed URL and added keyword
+      providesTags: ["SessionStartedOrder"],
+    }),
     getSessionStartedOrderById: builder.query({
       query: (id) => `/orders/session-started/${id}`,
       providesTags: ["SessionStartedOrder"],
@@ -131,13 +136,12 @@ export const orderApi = createApi({
         method: "POST",
         body: { sessionOrderId },
       }),
-      invalidatesTags: ["Order", "SessionStartedOrder", "AdminOrders"], // Adjust based on your needs
-      transformResponse: (response) => response.order, // Return just the order object
+      invalidatesTags: ["Order", "SessionStartedOrder", "AdminOrders"],
+      transformResponse: (response) => response.order,
       onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
         try {
           const { data } = await queryFulfilled;
           // Handle successful conversion if needed
-          // console.log("Order converted successfully:", data);
         } catch (error) {
           console.error("Error converting order:", error);
         }
@@ -163,5 +167,6 @@ export const {
   useSessionStartedOrdersQuery,
   useConvertSessionOrderMutation,
   useGetSessionStartedOrderByIdQuery,
-  useDeleteSessionOrderByIdMutation
+  useDeleteSessionOrderByIdMutation,
+  useSearchSessionStartedOrdersQuery,
 } = orderApi;

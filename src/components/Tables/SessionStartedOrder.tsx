@@ -3,6 +3,7 @@
 import {
   useDeleteSessionOrderByIdMutation,
   useSessionStartedOrdersQuery,
+  useSearchSessionStartedOrdersQuery, // Import the search query hook
 } from "@/redux/api/orderApi";
 import { SessionStartedOrder } from "@/types/sessionStartedOrder";
 import Link from "next/link";
@@ -17,9 +18,6 @@ import ReusableAlert from "@/utlis/alerts/ReusableAlert";
 import ClickToCopy from "@/utlis/ClickToCopy/SimpleClickToCopy";
 
 const SessionStartedOrders = () => {
-  const { data, isLoading, isError } = useSessionStartedOrdersQuery(null);
-  const [deleteOrder, { isLoading: isDeleting }] =
-    useDeleteSessionOrderByIdMutation();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
@@ -29,6 +27,36 @@ const SessionStartedOrders = () => {
   >({});
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+  // Fetch all session orders when there is no search query
+  const {
+    data: allOrdersData,
+    isLoading: isLoadingAll,
+    isError: isErrorAll,
+  } = useSessionStartedOrdersQuery(null, {
+    skip: !!searchQuery, // Skip this query if searchQuery is non-empty
+  });
+
+  // Fetch searched session orders when there is a search query
+  const {
+    data: searchedOrdersData,
+    isLoading: isLoadingSearch,
+    isError: isErrorSearch,
+  } = useSearchSessionStartedOrdersQuery(
+    { keyword: searchQuery },
+    {
+      skip: !searchQuery, // Skip this query if searchQuery is empty
+    },
+  );
+
+  const [deleteOrder, { isLoading: isDeleting }] =
+    useDeleteSessionOrderByIdMutation();
+
+  // Determine which data to use based on searchQuery
+  const data = searchQuery ? searchedOrdersData : allOrdersData;
+  const isLoading = searchQuery ? isLoadingSearch : isLoadingAll;
+  const isError = searchQuery ? isErrorSearch : isErrorAll;
+
+  // Function to remove duplicates based on user and shippingInfo
   const removeDuplicates = (
     orders: SessionStartedOrder[],
   ): SessionStartedOrder[] => {
@@ -40,6 +68,22 @@ const SessionStartedOrders = () => {
       return true;
     });
   };
+
+  // Process orders (remove duplicates)
+  const uniqueOrders = useMemo(
+    () => (data?.data ? removeDuplicates(data.data) : []),
+    [data]
+  );
+
+  // Update total items for pagination
+  useEffect(() => {
+    setTotalItems(uniqueOrders.length);
+  }, [uniqueOrders]);
+
+  // Paginate the unique orders
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const paginatedOrders = uniqueOrders.slice(indexOfFirstItem, indexOfLastItem);
 
   const handleDelete = async () => {
     try {
@@ -54,6 +98,7 @@ const SessionStartedOrders = () => {
     setCurrentSession(session);
     setIsDeleteModalOpen(true);
   };
+
   const closeDeleteModal = () => {
     setCurrentSession({});
     setIsDeleteModalOpen(false);
@@ -63,40 +108,6 @@ const SessionStartedOrders = () => {
     setSearchQuery(query);
     setCurrentPage(1); // Reset to first page on search
   };
-
-  // Get unique orders
-  const uniqueOrders = useMemo(() => {
-    return data?.data ? removeDuplicates(data.data) : [];
-  }, [data?.data]);
-
-  // Filter unique orders based on search query
-  const filteredOrders = useMemo(() => {
-    if (!searchQuery) return uniqueOrders; // No filter if query is empty
-    const queryLower = searchQuery.toLowerCase();
-    return uniqueOrders.filter((order) => {
-      const fullName = order.shippingInfo?.fullName?.toLowerCase() || "";
-      const orderId = order.razorpayOrderId?.toLowerCase() || "";
-      const mongoId = order._id.toString().toLowerCase();
-      return (
-        fullName.includes(queryLower) ||
-        orderId.includes(queryLower) ||
-        mongoId.includes(queryLower)
-      );
-    });
-  }, [uniqueOrders, searchQuery]);
-
-  // Update total items based on filtered orders
-  useEffect(() => {
-    setTotalItems(filteredOrders.length);
-  }, [filteredOrders]);
-
-  // Paginate filtered orders
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const paginatedOrders = filteredOrders.slice(
-    indexOfFirstItem,
-    indexOfLastItem,
-  );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -113,21 +124,6 @@ const SessionStartedOrders = () => {
   if (isError) {
     return <p>Error loading session started orders.</p>;
   }
-
-  // if (!filteredOrders || filteredOrders.length === 0) {
-  //   return (
-  //     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-  //       <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-  //         Session Started Orders
-  //       </h4>
-  //       <p className="text-center text-gray-500 dark:text-gray-400">
-  //         {searchQuery
-  //           ? "No session started orders match your search."
-  //           : "No session started orders found."}
-  //       </p>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -191,11 +187,10 @@ const SessionStartedOrders = () => {
                   {order._id.slice(-6)}
                 </th>
                 <td className="px-6 py-4 text-center">
-                  {order.shippingInfo.fullName || "N/A"}
+                  {order.shippingInfo?.fullName || "N/A"}
                 </td>
                 <td className="px-6 py-4 text-center">₹{order.totalAmount}</td>
                 <td className="px-6 py-4 text-center">
-                  {/* {order.razorpayOrderId || "N/A"} */}
                   <ClickToCopy label={""} value={order.razorpayOrderId} />
                 </td>
                 <td className="px-6 py-4 text-center">
@@ -227,7 +222,7 @@ const SessionStartedOrders = () => {
             ))}
           </tbody>
         </table>
-        {(!filteredOrders || filteredOrders.length === 0) && (
+        {(!uniqueOrders || uniqueOrders.length === 0) && (
           <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
             <p className="text-center text-gray-500 dark:text-gray-400">
               {searchQuery

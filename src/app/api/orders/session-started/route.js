@@ -30,14 +30,12 @@ export async function GET(request) {
       );
     };
 
-    // Filter out SessionStartedOrders that have matching shippingInfo with any Order
     const filteredSessionOrders = sessionOrders.filter((sessionOrder) => {
       return !orders.some((order) =>
         isShippingInfoEqual(sessionOrder.shippingInfo, order.shippingInfo),
       );
     });
 
-    // Create response first, then set headers
     const response = NextResponse.json({
       success: true,
       data: filteredSessionOrders,
