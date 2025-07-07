@@ -97,29 +97,7 @@ const menuGroups = [
         label: "Users",
         route: "/users",
       },
-      {
-        icon: (
-          <svg
-            className="h-[24px] w-[24px] text-gray-800 dark:text-white"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            width={24}
-            height={24}
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1}
-              d="M16 10.5h.01m-4.01 0h.01M8 10.5h.01M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-6.6a1 1 0 0 0-.69.275l-2.866 2.723A.5.5 0 0 1 8 18.635V17a1 1 0 0 0-1-1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
-            />
-          </svg>
-        ),
-        label: "Instagram DM's",
-        route: "/messages",
-      },
+
       {
         icon: (
           <svg
@@ -158,6 +136,30 @@ const menuGroups = [
           { label: "Session-started", route: "/orders/session-started" },
           { label: "All Orders", route: "/orders" },
         ],
+      },
+
+      {
+        icon: (
+          <svg
+            className="h-[24px] w-[24px]"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            width={24}
+            height={24}
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="square"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+            />
+          </svg>
+        ),
+        label: "Settings",
+        route: "/settings",
       },
       // {
       //   icon: (

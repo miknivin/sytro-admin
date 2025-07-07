@@ -23,13 +23,34 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
+    let updatedValue: any = value;
+
+    if (name === "offerEndTime") {
+      updatedValue = value ? new Date(value).toISOString() : "";
+    } else if (type === "number") {
+      updatedValue = value === "" ? "" : Number(value);
+    }
+
     const updatedProduct = {
       ...productState,
-      [name]: type === "number" ? (value === "" ? "" : Number(value)) : value,
+      [name]: updatedValue,
     };
 
     setProductState(updatedProduct);
     updateProduct(updatedProduct);
+  };
+
+  const formatDateForInput = (date: Date | string | undefined): string => {
+    if (!date) return "";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+    // Convert to local time and format to YYYY-MM-DDTHH:mm
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
   // Update both local state and parent component's state for category
@@ -41,6 +62,11 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
 
     setProductState(updatedProduct);
     updateProduct(updatedProduct);
+  };
+
+  const getCurrentDateTime = (): string => {
+    const now = new Date();
+    return now.toISOString().slice(0, 16); // Format to YYYY-MM-DDTHH:mm
   };
 
   // Handle form submission
@@ -129,7 +155,20 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
               />
             </div>
           </div>
-
+          <div className="mb-4.5">
+            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+              Offer End Time
+            </label>
+            <input
+              type="datetime-local"
+              name="offerEndTime"
+              min={getCurrentDateTime()}
+              value={formatDateForInput(productState.offerEndTime)}
+              onChange={handleChange}
+              placeholder="Select offer end date and time"
+              className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
+          </div>
           {/* Category Selection */}
           <SelectGroupOne
             category={productState.category}

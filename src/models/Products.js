@@ -15,6 +15,10 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
+    offerEndTime: {
+      type: Date,
+      required: false,
+    },
     details: {
       description: {
         type: String,

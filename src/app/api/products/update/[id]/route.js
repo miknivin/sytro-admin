@@ -8,7 +8,7 @@ export async function PUT(req, { params }) {
 
     const productId = params?.id;
     const body = await req.json();
-
+  
     if (!productId) {
       return NextResponse.json(
         { success: false, message: "Product ID is required" },
@@ -28,11 +28,33 @@ export async function PUT(req, { params }) {
     // Exclude images from the update request
     delete body.images;
 
+    // Ensure offerEndTime is a valid Date if provided
+    if (body.offerEndTime) {
+      const date = new Date(body.offerEndTime);
+      if (isNaN(date.getTime())) {
+        return NextResponse.json(
+          { success: false, message: "Invalid offerEndTime format" },
+          { status: 400 },
+        );
+      }
+      body.offerEndTime = date; // Convert to Date object for Mongoose
+    } else {
+      body.offerEndTime = null; // Explicitly set to null if not provided
+    }
+
+    // Perform the update
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
-      { $set: body }, // Only update allowed fields
+      { $set: body },
       { new: true, runValidators: true },
     );
+
+    if (!updatedProduct) {
+      return NextResponse.json(
+        { success: false, message: "Failed to update product" },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json(
       {
@@ -45,7 +67,7 @@ export async function PUT(req, { params }) {
   } catch (error) {
     console.error("Error updating product:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: error.message, stack: error.stack },
       { status: 500 },
     );
   }

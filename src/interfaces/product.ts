@@ -24,8 +24,9 @@ export interface Product {
     color?: string;
     weight?: number;
   };
-  capacity: number; // Added capacity
-  size: "Small" | "Medium" | "Large"; // Added size as an ENUM
+  offerEndTime?: any;
+  capacity: number;
+  size: "Small" | "Medium" | "Large";
   stock: number;
   numOfReviews?: number;
   reviews?: {
