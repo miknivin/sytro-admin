@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import BasicDetails from "./BasicDetails";
 import Descriptions from "./Descriptions";
-import ImageUpload from "./ImageUpload";
 import { Product } from "@/interfaces/product";
 import { isProductValid } from "@/utlis/validation/productValidators/entireProduct";
 import { useCreateProductMutation } from "@/redux/api/productsApi";

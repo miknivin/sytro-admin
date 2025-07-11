@@ -7,8 +7,7 @@ export async function GET() {
     await dbConnect();
 
     const settings = await WebsiteSettings.findOne().select("moments").lean();
-    console.log(settings, "settings");
-
+   
     if (!settings || !settings.moments) {
       return NextResponse.json({ success: true, data: [] }, { status: 200 });
     }

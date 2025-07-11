@@ -1,5 +1,15 @@
-export const categories:string[]= [
-    "Kids Bags",
-    "Professional Bags",
-    "Travel Bags"
-]
+export const categories: string[] = [
+  "Kids Bags",
+  "gym_duffle_bag",
+  "travel_duffle_bag",
+  "mens_sling_bag",
+  "womens_sling_bag",
+  "mens_backpack",
+  "laptop_backpack",
+  "ladies_backpack",
+  "womens_backpack",
+  "laptop_messenger_bag",
+  "trekking_bag",
+  "tote_bag",
+  "women_shoulder_bag",
+];

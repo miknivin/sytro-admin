@@ -3,12 +3,23 @@ import { categories } from "@/constants/categories";
 import React, { useState } from "react";
 
 interface SelectGroupOneProps {
-  category:string,
+  category: string;
   sendValue: (data: any) => void;
 }
 
-const SelectGroupOne: React.FC<SelectGroupOneProps> = ({category, sendValue }) => {
-  const [selectedOption, setSelectedOption] = useState<string>(category||"");
+// Utility function to format category names: underscores to spaces and capitalize words
+const formatCategoryName = (category: string): string => {
+  return category
+    .split("_") // Split on underscores
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize first letter of each word
+    .join(" "); // Join with spaces
+};
+
+const SelectGroupOne: React.FC<SelectGroupOneProps> = ({
+  category,
+  sendValue,
+}) => {
+  const [selectedOption, setSelectedOption] = useState<string>(category || "");
   const [isOptionSelected, setIsOptionSelected] = useState<boolean>(false);
 
   const changeTextColor = () => {
@@ -17,7 +28,10 @@ const SelectGroupOne: React.FC<SelectGroupOneProps> = ({category, sendValue }) =
 
   return (
     <div className="mb-4.5">
-      <label className="mb-2.5 block text-black dark:text-white"> Category </label>
+      <label className="mb-2.5 block text-black dark:text-white">
+        {" "}
+        Category{" "}
+      </label>
 
       <div className="relative z-20 bg-transparent dark:bg-form-input">
         <select
@@ -25,7 +39,7 @@ const SelectGroupOne: React.FC<SelectGroupOneProps> = ({category, sendValue }) =
           onChange={(e) => {
             const value = e.target.value;
             setSelectedOption(value);
-            sendValue(value); 
+            sendValue(value);
             changeTextColor();
           }}
           className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
@@ -35,13 +49,15 @@ const SelectGroupOne: React.FC<SelectGroupOneProps> = ({category, sendValue }) =
           <option value="" disabled className="text-body dark:text-bodydark">
             Select Category
           </option>
-          {categories.map((item,i)=>(
-          <option key={i} value={item} className="text-body dark:text-bodydark">
-            {item}
-          </option>
+          {categories.map((item, i) => (
+            <option
+              key={i}
+              value={item}
+              className="text-body dark:text-bodydark"
+            >
+              {formatCategoryName(item)}
+            </option>
           ))}
-          
-          
         </select>
 
         <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">

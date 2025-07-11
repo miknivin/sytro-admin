@@ -36,13 +36,16 @@ export const websiteSettingsApi = createApi({
       }),
     }),
     getMoments: builder.query({
-      query: () => "/moments",
+      query: () => ({
+        url: `/moments?t=${Date.now()}`,
+      }),
       providesTags: ["momentVideos"],
     }),
     deleteMoment: builder.mutation({
       query: (url) => ({
-        url: `/moments/${encodeURIComponent(url)}`,
+        url: "/moments/delete",
         method: "DELETE",
+        body: { url },
       }),
       invalidatesTags: ["momentVideos"],
     }),

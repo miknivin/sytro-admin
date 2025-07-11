@@ -23,7 +23,11 @@ export async function GET(req) {
 
     const skip = (page - 1) * limit;
 
-    const allProducts = await products.find().skip(skip).limit(limit);
+    const allProducts = await products
+      .find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ updatedAt: -1 });
 
     const totalProducts = await products.countDocuments();
 
