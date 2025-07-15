@@ -178,12 +178,12 @@ const TableThree = () => {
                         >
                           <ImagesIcon />
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => openAPlusModal(product)}
                           className="btn border-none bg-primary p-3 text-gray-200 hover:bg-primary/80"
                         >
                           <AplusContentIcon />
-                        </button>
+                        </button> */}
                         <Link
                           href={`products/update-product/${product._id}`}
                           className="btn border-none bg-primary p-3 text-gray-200 hover:bg-primary/80"
