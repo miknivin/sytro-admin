@@ -110,6 +110,41 @@ export const productApi = createApi({
       query: () => `/admin/orders`,
       providesTags: ["AdminOrders"],
     }),
+    uploadAPlusContentImages: builder.mutation({
+      query({ id, aPlusContentIndex, body }) {
+        return {
+          url: `/products/${id}/a-plus-content/${aPlusContentIndex}/upload`,
+          method: "POST",
+          body,
+        };
+      },
+      invalidatesTags: ["Product"],
+    }),
+    deleteAPlusContentImage: builder.mutation({
+      query({ id, aPlusContentIndex, body }) {
+        return {
+          url: `/products/${id}/a-plus-content/${aPlusContentIndex}/delete`,
+          method: "POST",
+          body,
+        };
+      },
+      invalidatesTags: ["Product", "AdminProducts"],
+    }),
+    imageUpload: builder.mutation({
+      query: ({ fileName, fileType, productId }) => ({
+        url: "/image-upload",
+        method: "POST",
+        body: { fileName, fileType, productId },
+      }),
+    }),
+    updateOfferEndTimeBulk: builder.mutation({
+      query: (offerEndTime) => ({
+        url: `/products/offer-time-bulk`,
+        method: "PUT",
+        params: { offerEndTime },
+      }),
+      invalidatesTags: ["Product", "AdminProducts"],
+    }),
   }),
 });
 
@@ -125,4 +160,8 @@ export const {
   useUploadKidsBagImagesMutation,
   useSubmitReviewMutation,
   useCanUserReviewQuery,
+  useUploadAPlusContentImagesMutation,
+  useDeleteAPlusContentImageMutation,
+  useImageUploadMutation,
+  useUpdateOfferEndTimeBulkMutation,
 } = productApi;

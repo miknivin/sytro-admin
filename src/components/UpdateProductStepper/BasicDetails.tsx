@@ -5,22 +5,26 @@ import SelectGroupOne from "../SelectGroup/SelectGroupOne";
 import { Product } from "@/interfaces/product";
 import Swal from "sweetalert2";
 import { validateForm } from "@/utlis/validation/productValidators/basicDetails";
+import { useUpdateOfferEndTimeBulkMutation } from "@/redux/api/productsApi";
 
 interface BasicDetailsProps {
   productProp: Product;
   updateProduct: (data: Product) => void;
   handleNextStep: () => void;
+  updateBulkUpdateFlag: (isBulkUpdate: boolean) => void;
   isUpdate: boolean;
 }
 
 const BasicDetails: React.FC<BasicDetailsProps> = ({
   productProp,
   updateProduct,
+  updateBulkUpdateFlag,
   handleNextStep,
   isUpdate = false,
 }) => {
   const [productState, setProductState] = useState<Product>(productProp);
-
+  const [isBulkUpdate, setIsBulkUpdate] = useState(false);
+  const [updateOfferEndTimeBulk] = useUpdateOfferEndTimeBulkMutation();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
     let updatedValue: any = value;
@@ -70,7 +74,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { isValid, errors } = validateForm(productState);
 
@@ -83,8 +87,34 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
       return;
     }
 
-    updateProduct(productState);
-    handleNextStep();
+    try {
+      if (isBulkUpdate) {
+        console.log("isBulkUpdate");
+
+        const response = await updateOfferEndTimeBulk(
+          productState.offerEndTime || null,
+        ).unwrap();
+        Swal.fire({
+          title: "Success",
+          text: response.message,
+          icon: "success",
+        });
+      }
+
+      updateProduct(productState);
+      handleNextStep();
+    } catch (error: any) {
+      Swal.fire({
+        title: "Error",
+        text: error?.data?.message || "Failed to update offer end time",
+        icon: "error",
+      });
+    }
+  };
+
+  const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsBulkUpdate(e.target.checked);
+    updateBulkUpdateFlag(e.target.checked);
   };
 
   return (
@@ -155,19 +185,33 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
               />
             </div>
           </div>
-          <div className="mb-4.5">
-            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-              Offer End Time
+          <div className="justify-strech mb-4.5  flex items-center gap-4 align-middle">
+            <div className="flex flex-col">
+              <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                Offer End Time
+              </label>
+              <input
+                type="datetime-local"
+                name="offerEndTime"
+                min={getCurrentDateTime()}
+                value={formatDateForInput(productState.offerEndTime)}
+                onChange={handleChange}
+                placeholder="Select offer end date and time"
+                className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              />
+            </div>
+            <label className="mt-2 inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                checked={isBulkUpdate}
+                onChange={handleToggle}
+                className="peer sr-only"
+              />
+              <div className="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:bg-blue-600 dark:peer-focus:ring-blue-800 rtl:peer-checked:after:-translate-x-full" />
+              <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                Apply to all products
+              </span>
             </label>
-            <input
-              type="datetime-local"
-              name="offerEndTime"
-              min={getCurrentDateTime()}
-              value={formatDateForInput(productState.offerEndTime)}
-              onChange={handleChange}
-              placeholder="Select offer end date and time"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-            />
           </div>
           {/* Category Selection */}
           <SelectGroupOne

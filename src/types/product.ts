@@ -19,15 +19,24 @@ type Specifications = {
   weight?: number;
 };
 
+type APlusContent = {
+  title: string;
+  content: string;
+  images: Image[];
+  videoUrl?: string;
+};
+
 type Details = {
   description: string;
   features?: string[];
   materialUsed?: string[];
+  aPlusContent?: APlusContent[];
 };
 
 type Image = {
-  url: string;
   _id: string;
+  url: string;
+  public_id: string;
 };
 
 export type Product = {
@@ -38,10 +47,10 @@ export type Product = {
   details: Details;
   ratings: number;
   images: Image[];
-  category: "Kids Bags" | "Professional Bags" | "Travel Bags";
+  category: any;
   specifications?: Specifications;
   capacity: number;
-  size: "Small" | "Medium" | "Large"; 
+  size: "Small" | "Medium" | "Large";
   stock: number;
   numOfReviews: number;
   reviews: Review[];

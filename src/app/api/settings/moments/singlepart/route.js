@@ -3,7 +3,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
 import dbConnect from "@/lib/db/connection"; // Import dbConnect
-import WebsiteSettings from './../../../../../models/WebsiteSettings';
+import WebsiteSettings from "./../../../../../models/WebsiteSettings";
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION,
@@ -14,7 +14,15 @@ const s3Client = new S3Client({
 });
 
 const validateFileType = (fileName) => {
-  const allowedExtensions = [".mp4", ".avi", ".mov"];
+  const allowedExtensions = [
+    ".mp4",
+    ".avi",
+    ".mov",
+    ".JPEG",
+    ".jpg",
+    ".webp",
+    ".png",
+  ];
   const extension = fileName.split(".").pop()?.toLowerCase();
   return allowedExtensions.includes(`.${extension}`);
 };

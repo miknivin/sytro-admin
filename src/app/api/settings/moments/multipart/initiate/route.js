@@ -16,7 +16,7 @@ const s3Client = new S3Client({
 });
 
 const validateFileType = (fileName) => {
-  const allowedExtensions = [".jpg", ".jpeg", ".png", ".mp4", ".pdf"];
+  const allowedExtensions = [".jpg", ".jpeg", ".png", ".mp4", ".pdf",".JPEG"];
   const extension = fileName.split(".").pop().toLowerCase();
   return allowedExtensions.includes(`.${extension}`);
 };

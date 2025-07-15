@@ -27,6 +27,22 @@ const productSchema = new mongoose.Schema(
       },
       features: [{ type: String }], // Removed enum restriction
       materialUsed: [{ type: String }],
+      aPlusContent: {
+        type: [
+          {
+            title: { type: String, required: true },
+            content: { type: String, required: false },
+            images: [
+              {
+                public_id: { type: String, required: false },
+                url: { type: String, required: true },
+              },
+            ],
+            videoUrl: { type: String, required: false },
+          },
+        ],
+        required: false,
+      },
     },
     ratings: {
       type: Number,

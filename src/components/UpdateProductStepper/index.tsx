@@ -6,6 +6,7 @@ import { Product } from "@/interfaces/product";
 import { isProductValid } from "@/utlis/validation/productValidators/entireProduct";
 import {
   useGetProductDetailsQuery,
+  useUpdateOfferEndTimeBulkMutation,
   useUpdateProductMutation,
 } from "@/redux/api/productsApi";
 import Swal from "sweetalert2";
@@ -21,8 +22,9 @@ const UpdateProductStepper: React.FC<UpdateProductStepperProps> = ({
 }) => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
-  const [product, setProduct] = useState<Product | null>(null); 
-
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isBulkUpdate, setIsBulkUpdate] = useState(false);
+  const [updateOfferEndTimeBulk] = useUpdateOfferEndTimeBulkMutation();
   const {
     data: fetchedProduct,
     isLoading: loadingProduct,
@@ -45,9 +47,9 @@ const UpdateProductStepper: React.FC<UpdateProductStepperProps> = ({
         title: "Success!",
         text: "Product updated successfully!",
       }).then(() => {
-        router.push("/products"); 
+        router.push("/products");
       });
-    
+
       setProduct(null);
       setCurrentStep(1);
     }
@@ -59,6 +61,10 @@ const UpdateProductStepper: React.FC<UpdateProductStepperProps> = ({
 
   const prevStep = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
+
+  const handleBulkUpdateFlag = (isBulkUpdate: boolean) => {
+    setIsBulkUpdate(isBulkUpdate);
   };
 
   const handleStepClick = (step: number) => {
@@ -90,8 +96,19 @@ const UpdateProductStepper: React.FC<UpdateProductStepperProps> = ({
     };
 
     try {
+      if (isBulkUpdate) {
+        const response = await updateOfferEndTimeBulk(
+          product.offerEndTime || null,
+        ).unwrap();
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: response.message,
+        });
+      }
+
       await updateProduct({ id: productId, body: formattedProduct }).unwrap();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error updating product:", err);
       Swal.fire({
         icon: "error",
@@ -146,6 +163,7 @@ const UpdateProductStepper: React.FC<UpdateProductStepperProps> = ({
           <BasicDetails
             productProp={product}
             handleNextStep={nextStep}
+            updateBulkUpdateFlag={handleBulkUpdateFlag}
             updateProduct={handleIncomingData}
             isUpdate={true}
           />
