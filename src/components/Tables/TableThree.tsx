@@ -36,12 +36,11 @@ const TableThree = () => {
   const { data, isLoading, isFetching, isError } = useGetProductsQuery({
     page: currentPage,
     limit: itemsPerPage,
-    search: searchTerm,
+    keyword: searchTerm.trim(), // Trim to avoid sending whitespace
     category: selectedCategory === "All categories" ? "" : selectedCategory,
   });
 
-  const [deleteProduct, { isLoading: isDeleting, isSuccess }] =
-    useDeleteProductMutation();
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
   const openUploadModal = () => setIsUploadModalOpen(true);
   const closeUploadModal = () => setIsUploadModalOpen(false);
@@ -99,7 +98,7 @@ const TableThree = () => {
   };
 
   const handleSearch = (newSearchTerm: string, newCategory: string) => {
-    setSearchTerm(newSearchTerm);
+    setSearchTerm(newSearchTerm.trim()); // Trim to avoid whitespace issues
     setSelectedCategory(newCategory);
     setCurrentPage(1); // Reset to first page on new search or category change
   };
@@ -185,19 +184,6 @@ const TableThree = () => {
                         >
                           <AplusContentIcon />
                         </button>
-                        {isAPlusModalOpen && currentProduct && (
-                          <ReusableModal
-                            onClose={closeAPlusModal}
-                            formContent={
-                              <ProductAPlusImagesUpload
-                                product={currentProduct}
-                                aPlusContentIndex={aPlusContentIndex}
-                                onClose={closeAPlusModal}
-                              />
-                            }
-                            title={`A+ Content Images for ${currentProduct.name}`}
-                          />
-                        )}
                         <Link
                           href={`products/update-product/${product._id}`}
                           className="btn border-none bg-primary p-3 text-gray-200 hover:bg-primary/80"
@@ -239,7 +225,7 @@ const TableThree = () => {
 
           <div className="mt-4 flex justify-end">
             <select
-              defaultValue={itemsPerPage}
+              value={itemsPerPage}
               onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
               className="select rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
             >
@@ -281,6 +267,19 @@ const TableThree = () => {
           functionTitle={"Delete"}
           buttonStyle={"bg-red-600"}
           onClose={closeDeleteModal}
+        />
+      )}
+      {isAPlusModalOpen && currentProduct && (
+        <ReusableModal
+          onClose={closeAPlusModal}
+          formContent={
+            <ProductAPlusImagesUpload
+              product={currentProduct}
+              aPlusContentIndex={aPlusContentIndex}
+              onClose={closeAPlusModal}
+            />
+          }
+          title={`A+ Content Images for ${currentProduct.name}`}
         />
       )}
     </div>

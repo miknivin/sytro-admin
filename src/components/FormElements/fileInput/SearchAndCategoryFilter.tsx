@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface SearchAndCategoryFilterProps {
   searchTerm: string;
@@ -10,7 +10,7 @@ interface SearchAndCategoryFilterProps {
 }
 
 const formatCategoryName = (category: string): string => {
-  if (category === "All categories") return category; // Preserve "All categories" as is
+  if (category === "All categories") return category;
   return category
     .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -42,16 +42,24 @@ const SearchAndCategoryFilter: React.FC<SearchAndCategoryFilterProps> = ({
   onSearch,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(searchTerm);
+
+  // Sync inputValue with searchTerm when searchTerm changes
+  useEffect(() => {
+    setInputValue(searchTerm);
+  }, [searchTerm]);
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     setIsDropdownOpen(false);
-    onSearch(searchTerm, category); // Trigger search on category change
+    setSearchTerm(inputValue); // Ensure searchTerm is updated
+    onSearch(inputValue, category); // Trigger search with current inputValue
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSearch(searchTerm, selectedCategory); // Trigger search on form submission
+    setSearchTerm(inputValue); // Update searchTerm on form submission
+    onSearch(inputValue, selectedCategory); // Trigger search
   };
 
   return (
@@ -114,8 +122,8 @@ const SearchAndCategoryFilter: React.FC<SearchAndCategoryFilterProps> = ({
               id="search-dropdown"
               className="z-20 block w-full rounded-e-lg border border-s-2 border-gray-300 border-s-gray-50 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:border-s-gray-700 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500"
               placeholder="Search Kids Bags, Backpacks..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
             />
             <button
               type="submit"
