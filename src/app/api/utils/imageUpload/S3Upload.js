@@ -32,7 +32,7 @@ export async function uploadFilesToS3(files) {
     const command = new PutObjectCommand(uploadParams);
     await s3.send(command);
 
-    const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${file.name}`;
+    const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${uniqueFileName}`;
     uploadedFiles.push({ name: file.name, url: fileUrl });
   }
 
