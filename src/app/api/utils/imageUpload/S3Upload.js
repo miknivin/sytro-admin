@@ -17,10 +17,14 @@ export async function uploadFilesToS3(files) {
 
   for (const file of files) {
     const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const uniqueId = Math.floor(100000 + Math.random() * 900000); // Generate 6-digit random number
+    const timestamp = Date.now(); // Current timestamp
+    const uniqueFileName = `${uniqueId}-${timestamp}${file.name}`; // 6-digit ID + timestamp +
+    console.log(uniqueFileName, "unique file name");
 
     const uploadParams = {
       Bucket: process.env.AWS_BUCKET_NAME,
-      Key: `uploads/${file.name}`,
+      Key: `uploads/${uniqueFileName}`,
       Body: fileBuffer,
       ContentType: file.type,
     };
