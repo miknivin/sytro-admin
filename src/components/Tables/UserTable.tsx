@@ -167,6 +167,9 @@ const UserTable = () => {
                 Email
               </th>
               <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
+                Phone
+              </th>
+              <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
                 Role
               </th>
               <th className="px-4 py-4 font-medium text-black dark:text-white">
@@ -195,8 +198,14 @@ const UserTable = () => {
                   <p className="text-black dark:text-white">{user.email}</p>
                 </td>
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                  <p className="text-black dark:text-white">
+                    {user?.phone || "N/A"}
+                  </p>
+                </td>
+                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <p className="text-black dark:text-white">{user.role}</p>
                 </td>
+
                 <td className="flex gap-5 px-4 py-5">
                   <button
                     onClick={() => openEditModal(user._id || "")}
