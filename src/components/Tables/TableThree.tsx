@@ -76,6 +76,56 @@ const TableThree = () => {
     setIsAPlusModalOpen(false);
   };
 
+  const handleDownloadCSV = async () => {
+    try {
+      // Fetch all products without pagination
+      const response = await fetch("/api/seeders/all-products");
+      const result = await response.json();
+
+      if (!result.success) {
+        toast.error("Failed to fetch products for CSV");
+        return;
+      }
+
+      const products = result.allProducts;
+
+      // CSV header
+      const headers = ["id", "name", "images"];
+      // Map products to CSV rows
+      const rows = products.map((product: Product) => {
+        const imageUrls = product.images
+          .map((img: { url: string }) => img.url)
+          .join(",");
+        return [
+          `"${product._id}"`,
+          `"${product.name.replace(/"/g, '""')}"`, // Escape quotes in name
+          `"${imageUrls.replace(/"/g, '""')}"`, // Escape quotes in image URLs
+        ].join(",");
+      });
+
+      // Combine headers and rows
+      const csvContent = [headers.join(","), ...rows].join("\n");
+
+      // Create a Blob for the CSV
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
+      // Create a link element to trigger download
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "products.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success("CSV downloaded successfully");
+    } catch (error) {
+      console.error("Error generating CSV:", error);
+      toast.error("Error generating CSV");
+    }
+  };
+
   const handleDelete = async () => {
     if (!currentProduct) return;
     try {
@@ -109,6 +159,9 @@ const TableThree = () => {
         <h1 className="text-xl font-semibold text-black dark:text-white">
           Total Products: {data?.totalProducts || 0}
         </h1>
+        {/* <button className="btn btn-primary" onClick={handleDownloadCSV}>
+          Get csv
+        </button> */}
         <SearchAndCategoryFilter
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}

@@ -54,7 +54,7 @@ const ChatCard = () => {
                   {user.name}
                 </h5>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {user.email}
+                  {user.email || user.phone}
                 </p>
               </div>
             </div>

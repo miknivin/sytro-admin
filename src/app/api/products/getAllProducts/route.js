@@ -42,7 +42,7 @@ export async function GET(req) {
       .find(query)
       .skip(skip)
       .limit(limit)
-      .sort({ updatedAt: -1 });
+      .sort({ createdAt: -1 });
 
     const totalProducts = await products.countDocuments(query);
 
