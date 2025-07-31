@@ -90,16 +90,40 @@ const TableThree = () => {
       const products = result.allProducts;
 
       // CSV header
-      const headers = ["id", "name", "images"];
+      const headers = [
+        "id",
+        "name",
+        "image",
+        "description",
+        "link",
+        "availability",
+        "brand",
+        "condition",
+        "price",
+      ];
       // Map products to CSV rows
       const rows = products.map((product: Product) => {
-        const imageUrls = product.images
-          .map((img: { url: string }) => img.url)
-          .join(",");
+        const imageUrl =
+          product.images && product.images.length > 0
+            ? product.images[0].url
+            : "";
+        const description = product.details?.description || "";
+        const link =
+          product.category !== "Kids Bags"
+            ? `https://www.sytrobags.com/product-no-zoom/${product._id}`
+            : `https://www.sytrobags.com/product-detail/${product._id}`;
+        const price = product.offer != null ? product.offer.toString() : ""; // Convert to string, handle null/undefined
+
         return [
           `"${product._id}"`,
           `"${product.name.replace(/"/g, '""')}"`, // Escape quotes in name
-          `"${imageUrls.replace(/"/g, '""')}"`, // Escape quotes in image URLs
+          `"${imageUrl.replace(/"/g, '""')}"`, // Escape quotes in image URL
+          `"${description.replace(/"/g, '""')}"`, // Escape quotes in description
+          `"${link}"`,
+          `"available"`,
+          `"sytrobags"`,
+          `"new"`,
+          `"${price}"`, // Price as string
         ].join(",");
       });
 
@@ -193,7 +217,7 @@ const TableThree = () => {
                     Stocks
                   </th>
                   <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
-                    Rating
+                    Created at
                   </th>
                   <th className="px-4 py-4 font-medium text-black dark:text-white">
                     Actions
@@ -221,7 +245,14 @@ const TableThree = () => {
                       </td>
                       <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                         <p className="text-black dark:text-white">
-                          {product.ratings} ⭐
+                          {new Date(product.createdAt).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "2-digit",
+                            },
+                          )}
                         </p>
                       </td>
                       <td className="flex flex-wrap gap-3 border-b border-[#eee] px-4 py-5 dark:border-strokedark">

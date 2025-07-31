@@ -14,6 +14,7 @@ export interface OrderItem {
   quantity: number;
   image: string;
   price: number;
+  customNameToPrint?:string;
   product: string | Types.ObjectId;
   uploadedImage: string[];
 }

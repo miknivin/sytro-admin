@@ -15,7 +15,8 @@ interface ProductItemProps {
 }
 
 const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
-  const { name, quantity, image, price, uploadedImage } = product;
+  const { name, quantity, image, price, uploadedImage, customNameToPrint } =
+    product;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -45,9 +46,13 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
       </div>
       <div className="flex w-full flex-col items-start justify-between space-y-4 border-b border-gray-200 pb-8 dark:border-gray-700 md:flex-row md:space-y-0">
         <div className="flex w-full flex-col items-start justify-start space-y-8">
-          <h3 className="text-xl font-semibold leading-6 text-gray-800 dark:text-gray-100 xl:text-2xl">
+          <h3 className="line-clamp-3 text-ellipsis whitespace-break-spaces text-xl font-semibold leading-6  text-gray-800 dark:text-gray-100 xl:text-2xl">
             {name}
           </h3>
+          {customNameToPrint && (
+            <p className=" text-xl font-medium">{customNameToPrint}</p>
+          )}
+
           <div className="dropdown relative mt-1" ref={dropdownRef}>
             <div
               role="button"
