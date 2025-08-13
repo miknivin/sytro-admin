@@ -45,7 +45,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
         <img className="hidden w-full md:block" src={image} alt={name} />
       </div>
       <div className="flex w-full flex-col items-start justify-between space-y-4 border-b border-gray-200 pb-8 dark:border-gray-700 md:flex-row md:space-y-0">
-        <div className="flex w-full flex-col items-start justify-start space-y-8">
+        <div className="flex w-full flex-col items-start justify-start space-y-4">
           <h3 className="line-clamp-3 text-ellipsis whitespace-break-spaces text-xl font-semibold leading-6  text-gray-800 dark:text-gray-100 xl:text-2xl">
             {name}
           </h3>

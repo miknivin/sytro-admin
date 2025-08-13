@@ -40,6 +40,10 @@ const sessionStartedOrderSchema = new mongoose.Schema(
           required: true,
           ref: "products",
         },
+        customNameToPrint: {
+          type: String,
+          required: false,
+        },
       },
     ],
     paymentInfo: {

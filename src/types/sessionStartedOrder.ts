@@ -19,9 +19,10 @@ export interface OrderItem {
   name: string;
   uploadedImage: string[];
   quantity: number;
+  customNameToPrint?: string;
   image: string;
   price: string;
-  product: ObjectId | string; // Can be ObjectId or string depending on population
+  product: ObjectId | string; 
 }
 
 // Interface for payment information
