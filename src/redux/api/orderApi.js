@@ -147,6 +147,48 @@ export const orderApi = createApi({
         }
       },
     }),
+    createDelhiveryOrder: builder.mutation({
+      query: (orderId) => ({
+        url: `/orders/webhook/create-delhivery-orders/${orderId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Order", "AdminOrders"], // Refresh order details and admin orders
+      transformResponse: (response) => ({
+        success: response.success,
+        message: response.message,
+        waybill: response.waybill,
+      }),
+      onQueryStarted: async (orderId, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          // Handle successful Delhivery order creation if needed
+          console.log(`Delhivery order created: ${data.waybill}`);
+        } catch (error) {
+          console.error("Error creating Delhivery order:", error);
+        }
+      },
+    }),
+    syncDelhiveryOrders: builder.mutation({
+      query: () => ({
+        url: "/orders/webhook/sync-delhivery-orders",
+        method: "POST",
+        body: {},
+      }),
+      invalidatesTags: ["AdminOrders"], // Trigger refetch of getAdminOrders
+      transformResponse: (response) => ({
+        success: response.success,
+        message: response.message,
+      }),
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success(data.message); // Display success message
+        } catch (error) {
+          toast.error("Failed to sync orders"); // Display error message
+          console.error("Error syncing Delhivery orders:", error);
+        }
+      },
+    }),
   }),
 });
 
@@ -169,4 +211,6 @@ export const {
   useGetSessionStartedOrderByIdQuery,
   useDeleteSessionOrderByIdMutation,
   useSearchSessionStartedOrdersQuery,
+  useCreateDelhiveryOrderMutation,
+  useSyncDelhiveryOrdersMutation,
 } = orderApi;

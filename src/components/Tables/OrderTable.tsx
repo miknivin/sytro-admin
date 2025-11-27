@@ -3,6 +3,7 @@
 import {
   useGetAdminOrdersQuery,
   useDeleteOrderMutation,
+  useSyncDelhiveryOrdersMutation,
 } from "@/redux/api/orderApi";
 import { Order } from "@/types/order";
 import Link from "next/link";
@@ -14,10 +15,13 @@ import DeleteIcon from "../SvgIcons/DeleteIcon";
 import ReusableAlert from "@/utlis/alerts/ReusableAlert";
 import toast from "react-hot-toast";
 import SearchInput from "@/utlis/search/SearchInput";
-import Download from "../SvgIcons/Download";
-
+// import Download from "../SvgIcons/Download";
+import CsvIcon from "../SvgIcons/CsvIcon"; // replaces your old Download icon
+import { Tooltip } from "@mui/material";
+import Spinner from "../common/Spinner"; // for better loading states
+import SyncIcon from "../SvgIcons/SyncIcons";
+// Define all hooks at the top
 const OrderTable = () => {
-  // Define all hooks at the top
   const { data, isLoading, isError } = useGetAdminOrdersQuery(null);
   const [deleteOrder, { isLoading: isDeleting }] = useDeleteOrderMutation();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -26,7 +30,8 @@ const OrderTable = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [syncDelhiveryOrders, { isLoading: isSyncing }] =
+    useSyncDelhiveryOrdersMutation();
   // Handle search input
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -56,6 +61,17 @@ const OrderTable = () => {
   const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
 
   // Handle page change
+
+  const handleSyncOrders = async () => {
+    try {
+      const response = await syncDelhiveryOrders({}).unwrap();
+      toast.success(
+        response.message || "Orders synced successfully with Delhivery",
+      );
+    } catch (error) {
+      // Error already handled in RTK Query
+    }
+  };
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -81,7 +97,11 @@ const OrderTable = () => {
       { label: "Zip Code", value: "shippingInfo.zipCode" },
       { label: "Total Amount", value: "totalAmount" },
       { label: "Payment Method", value: "paymentMethod" },
-      { label: "Order Status", value: "orderStatus" },
+      {
+        label: "Order Status",
+        value: (order: any) =>
+          order.delhiveryCurrentOrderStatus || order.orderStatus,
+      },
       { label: "Date", value: "createdAt" },
     ];
 
@@ -153,21 +173,36 @@ const OrderTable = () => {
           <select
             defaultValue="8"
             onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            className="select rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+            className="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
           >
-            <option disabled={true}>Select items per page</option>
+            <option disabled>Select items per page</option>
             <option value="5">5</option>
             <option value="8">8</option>
             <option value="20">20</option>
             <option value="50">50</option>
           </select>
-          <button
-            onClick={exportToCSV}
-            className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary/70 focus:outline-none focus:ring-2 focus:ring-primary/50"
-            disabled={isDownloading}
-          >
-            {isDownloading ? "Downloading..." : "Export to CSV"}
-          </button>
+
+          {/* Export CSV Button */}
+          <Tooltip title="Export as CSV" arrow>
+            <button
+              onClick={exportToCSV}
+              disabled={isDownloading}
+              className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary/70 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+            >
+              {isDownloading ? <Spinner /> : <CsvIcon />}
+            </button>
+          </Tooltip>
+
+          {/* Sync with Delhivery Button */}
+          <Tooltip title="Sync Orders with Delhivery" arrow>
+            <button
+              onClick={handleSyncOrders}
+              disabled={isSyncing}
+              className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary/70 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+            >
+              {isSyncing ? <Spinner /> : <SyncIcon />}
+            </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -211,7 +246,9 @@ const OrderTable = () => {
                   {order.shippingInfo.fullName || "N/A"}
                 </td>
                 <td className="px-6 py-4 text-center">₹{order.totalAmount}</td>
-                <td className="px-6 py-4 text-center">{order.orderStatus}</td>
+                <td className="px-6 py-4 text-center">
+                  {order.delhiveryCurrentStatus || order.orderStatus}
+                </td>
                 <td className="px-6 py-4 text-center">
                   {new Date(order.createdAt).toLocaleDateString("en-GB", {
                     day: "2-digit",

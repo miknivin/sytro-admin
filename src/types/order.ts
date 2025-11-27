@@ -7,14 +7,23 @@ export interface ShippingInfo {
   phoneNo: string;
   zipCode: string;
   country: string;
+  email?: string;
+  state?: string;
 }
 
+export interface OrderTracking {
+  Status: string;
+  StatusDateTime: Date;
+  StatusType: string;
+  StatusLocation: string;
+  Instructions: string;
+}
 export interface OrderItem {
   name: string;
   quantity: number;
   image: string;
   price: number;
-  customNameToPrint?:string;
+  customNameToPrint?: string;
   product: string | Types.ObjectId;
   uploadedImage: string[];
 }
@@ -41,4 +50,9 @@ export interface Order {
   couponApplied?: string;
   createdAt: Date;
   updatedAt?: Date;
+  waybill?: string;
+  invoiceURL?: string;
+  delhiveryCurrentStatus?: string | null;
+  orderTracking?: OrderTracking[];
+  shiprocketOrderId?: string;
 }

@@ -116,6 +116,33 @@ const orderSchema = new mongoose.Schema(
         message: "Please select valid order status",
       },
     },
+    waybill: {
+      type: String,
+      unique: true,
+      sparse: true, // Important: allows multiple orders without waybill
+      required: false,
+    },
+
+    invoiceURL: {
+      type: String,
+      required: false,
+    },
+
+    delhiveryCurrentStatus: {
+      type: String,
+      required: false,
+      default: null,
+    },
+
+    orderTracking: [
+      {
+        Status: { type: String },
+        StatusDateTime: { type: Date },
+        StatusType: { type: String },
+        StatusLocation: { type: String },
+        Instructions: { type: String },
+      },
+    ],
     shiprocketOrderId: {
       type: String,
       required: false,

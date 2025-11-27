@@ -10,16 +10,18 @@ import Spinner from "../common/Spinner";
 import { Order } from "@/types/order";
 import { formatDate } from "./../../utlis/formatDate";
 import Link from "next/link";
+import { trackDelhiveryShipment } from "@/utlis/trackDelhiveryShipment";
 
 interface OrderDetailsProps {
   orderId: string;
 }
 
 export default function OrderDetails({ orderId }: OrderDetailsProps) {
-  
   const { data, error, isLoading } = useOrderDetailsQuery(orderId);
   const [orderDetails, setOrderDetails] = useState<Order | null>(null);
-
+  // Delhivery live tracking states
+  const [delhiveryStatus, setDelhiveryStatus] = useState<string>("");
+  const [delhiveryError, setDelhiveryError] = useState<boolean>(false);
   useEffect(() => {
     if (data) {
       setOrderDetails(data.order);
@@ -30,6 +32,37 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
   // useEffect(() => {
   //   console.log("Order ID:", orderId); // Log the orderId
   // }, [orderId]);
+
+  // Automatically fetch Delhivery tracking status when order has a waybill
+  useEffect(() => {
+    const fetchAndUpdateStatus = async () => {
+      if (!orderDetails?.waybill) {
+        setDelhiveryStatus("");
+        setDelhiveryError(true);
+        return;
+      }
+
+      try {
+        const trackResult = await trackDelhiveryShipment(orderDetails.waybill);
+        const shipmentStatus =
+          trackResult?.ShipmentData?.[0]?.Shipment?.Status?.Status;
+
+        if (shipmentStatus) {
+          setDelhiveryStatus(shipmentStatus);
+          setDelhiveryError(false);
+        } else {
+          setDelhiveryStatus("");
+          setDelhiveryError(true);
+        }
+      } catch (error) {
+        console.error("Delhivery tracking error:", error);
+        setDelhiveryStatus("");
+        setDelhiveryError(true);
+      }
+    };
+
+    fetchAndUpdateStatus();
+  }, [orderDetails]);
 
   if (isLoading) {
     return <Spinner />;
@@ -55,6 +88,9 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
         orderDate={formatDate(orderDetails.createdAt)}
         orderId={orderDetails._id}
         orderStatus={orderDetails.orderStatus}
+        delhiveryStatus={delhiveryStatus}
+        showCreateDelhiveryLink={!orderDetails.waybill}
+        delhiveryError={delhiveryError || !orderDetails.waybill}
       />
       <div className="mt-10 flex w-full flex-col items-stretch justify-center space-y-4 md:space-y-6 xl:flex-row xl:space-x-8 xl:space-y-0">
         <div className="flex w-full flex-col items-start justify-start space-y-4 md:space-y-6 xl:space-y-8">
