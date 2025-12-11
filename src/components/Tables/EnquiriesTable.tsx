@@ -32,7 +32,7 @@ const EnquiriesTable = () => {
 
   const filteredEnquiries = useMemo(() => {
     let enquiries = data?.enquiries || [];
-    console.log("Enquiries:", enquiries); // Debug: Log filtered enquiries
+    // console.log("Enquiries:", enquiries); // Debug: Log filtered enquiries
 
     if (!searchQuery) return enquiries;
 
