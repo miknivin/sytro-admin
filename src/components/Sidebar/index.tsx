@@ -98,6 +98,7 @@ const menuGroups = [
         route: "/users",
       },
 
+
       {
         icon: (
           <svg
@@ -160,6 +161,41 @@ const menuGroups = [
         ),
         label: "Settings",
         route: "/settings",
+      },
+      {
+        icon: (
+          <svg
+            className="fill-current"
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M15.7501 0.55835H2.2501C1.29385 0.55835 0.506348 1.34585 0.506348 2.3021V15.8021C0.506348 16.7584 1.29385 17.574 2.27822 17.574H15.7782C16.7345 17.574 17.5501 16.7865 17.5501 15.8021V2.3021C17.522 1.34585 16.7063 0.55835 15.7501 0.55835ZM16.2563 15.8021C16.2563 16.0834 16.0313 16.3084 15.7501 16.3084H2.2501C1.96885 16.3084 1.74385 16.0834 1.74385 15.8021V2.3021C1.74385 2.02085 1.96885 1.79585 2.2501 1.79585H15.7501C16.0313 1.79585 16.2563 2.02085 16.2563 2.3021V15.8021Z"
+              fill=""
+            />
+            <path
+              d="M14.0626 4.89585H3.9376C3.60010 4.89585 3.31885 5.1771 3.31885 5.5146C3.31885 5.8521 3.60010 6.13335 3.9376 6.13335H14.0626C14.4001 6.13335 14.6813 5.8521 14.6813 5.5146C14.6813 5.1771 14.4001 4.89585 14.0626 4.89585Z"
+              fill=""
+            />
+            <path
+              d="M14.0626 8.0146H3.9376C3.60010 8.0146 3.31885 8.29585 3.31885 8.63335C3.31885 8.97085 3.60010 9.2521 3.9376 9.2521H14.0626C14.4001 9.2521 14.6813 8.97085 14.6813 8.63335C14.6813 8.29585 14.4001 8.0146 14.0626 8.0146Z"
+              fill=""
+            />
+            <path
+              d="M14.0626 11.1334H3.9376C3.60010 11.1334 3.31885 11.4146 3.31885 11.7521C3.31885 12.0896 3.60010 12.3709 3.9376 12.3709H14.0626C14.4001 12.3709 14.6813 12.0896 14.6813 11.7521C14.6813 11.4146 14.4001 11.1334 14.0626 11.1334Z"
+              fill=""
+            />
+            <path
+              d="M14.0626 14.2521H3.9376C3.60010 14.2521 3.31885 14.5334 3.31885 14.8709C3.31885 15.2084 3.60010 15.4896 3.9376 15.4896H14.0626C14.4001 15.4896 14.6813 15.2084 14.6813 14.8709C14.6813 14.5334 14.4001 14.2521 14.0626 14.2521Z"
+              fill=""
+            />
+          </svg>
+        ),
+        label: "Enquiries",
+        route: "/enquiries",
       },
       // {
       //   icon: (
@@ -360,9 +396,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
-        className={`fixed left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* <!-- SIDEBAR HEADER --> */}
         <div className="flex items-center justify-between gap-2 px-6 pb-3 pt-4 ">

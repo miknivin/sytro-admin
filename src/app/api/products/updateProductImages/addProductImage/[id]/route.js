@@ -15,11 +15,11 @@ export async function PATCH(req, { params }) {
     await dbConnect();
     const user = await isAuthenticatedUser(req)
     //console.log(user);
-    
+
     if (user) {
-        console.log(user.role);
-        
-        authorizeRoles(user,'admin')
+      console.log(user.role);
+
+      authorizeRoles(user, 'admin')
     }
     const formData = await req.formData();
     const files = formData.getAll("images");
