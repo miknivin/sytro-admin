@@ -35,15 +35,31 @@ const OrderSummary: React.FC<{ order: Order }> = ({ order }) => {
             ₹{order.taxAmount.toFixed(2)}
           </p>
         </div>
-        {order?.couponApplied !== "No" && (
-          <div className="flex w-full items-center justify-between">
-            <p className="text-base leading-4 text-gray-800 dark:text-gray-100">
-              Coupon Applied
-            </p>
-            <p className="text-base leading-4 text-gray-800 dark:text-gray-100">
-              {order?.couponApplied}
-            </p>
-          </div>
+
+        {order?.couponApplied && order.couponApplied !== "No" && (
+          <>
+            <div className="flex w-full items-center justify-between">
+              <p className="text-base leading-4 text-gray-800 dark:text-gray-100">
+                Coupon Applied
+              </p>
+              <p className="text-base leading-4 text-gray-800 dark:text-gray-100 italic">
+                {order.couponApplied}
+              </p>
+            </div>
+            <div className="flex w-full items-center justify-between">
+              <p className="text-base leading-4 text-gray-800 dark:text-gray-100">
+                Discount{" "}
+                {order.couponDiscountValue
+                  ? order.couponDiscountType === "percentage"
+                    ? `(${order.couponDiscountValue}%)`
+                    : `(₹${order.couponDiscountValue})`
+                  : ""}
+              </p>
+              <p className="text-base leading-4 text-red-500 font-medium">
+                -₹{((order.discountAmount || 0) || Math.max(0, (order.itemsPrice || 0) - (order.totalAmount || 0))).toFixed(2)}
+              </p>
+            </div>
+          </>
         )}
       </div>
       <div className="flex w-full items-center justify-between border-b border-gray-200 pb-3 dark:border-gray-700">

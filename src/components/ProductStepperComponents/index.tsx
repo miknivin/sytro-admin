@@ -23,6 +23,7 @@ const StepperApp = () => {
     images: [],
     size: "Small",
     capacity: 15,
+    youtubeUrl: [],
   });
 
   const nextStep = () => {
@@ -67,6 +68,7 @@ const StepperApp = () => {
         images: [],
         size: "Small",
         capacity: 0,
+        youtubeUrl: [],
       });
       setCurrentStep(1);
     } catch (err) {
@@ -107,14 +109,12 @@ const StepperApp = () => {
             <li
               key={step}
               onClick={() => handleStepClick(step)}
-              className={`flex cursor-pointer items-center space-x-2.5 ${
-                currentStep >= step ? "text-blue-600" : "text-gray-500"
-              }`}
+              className={`flex cursor-pointer items-center space-x-2.5 ${currentStep >= step ? "text-blue-600" : "text-gray-500"
+                }`}
             >
               <span
-                className={`flex h-8 w-8 items-center justify-center rounded-full border ${
-                  currentStep >= step ? "border-blue-600" : "border-gray-500"
-                }`}
+                className={`flex h-8 w-8 items-center justify-center rounded-full border ${currentStep >= step ? "border-blue-600" : "border-gray-500"
+                  }`}
               >
                 {step}
               </span>

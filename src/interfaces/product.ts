@@ -37,4 +37,5 @@ export interface Product {
   user: string;
   createdAt?: string;
   updatedAt?: string;
+  youtubeUrl?: string[];
 }

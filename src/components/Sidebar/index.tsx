@@ -197,6 +197,33 @@ const menuGroups = [
         label: "Enquiries",
         route: "/enquiries",
       },
+       {
+  icon: (
+    <svg
+      className="fill-current"
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M15.75 3.75H2.25C1.83579 3.75 1.5 4.08579 1.5 4.5V6C1.5 6.41421 1.83579 6.75 2.25 6.75C3.07843 6.75 3.75 7.42157 3.75 8.25C3.75 9.07843 3.07843 9.75 2.25 9.75C1.83579 9.75 1.5 10.0858 1.5 10.5V12C1.5 12.4142 1.83579 12.75 2.25 12.75H15.75C16.1642 12.75 16.5 12.4142 16.5 12V10.5C16.5 10.0858 16.1642 9.75 15.75 9.75C14.9216 9.75 14.25 9.07843 14.25 8.25C14.25 7.42157 14.9216 6.75 15.75 6.75C16.1642 6.75 16.5 6.41421 16.5 6V4.5C16.5 4.08579 16.1642 3.75 15.75 3.75Z"
+        fill=""
+      />
+      <path
+        d="M6 8.25L8.25 10.5L12 6.75"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </svg>
+  ),
+  label: "Coupons",
+  route: "/coupons",
+},
       // {
       //   icon: (
       //     <svg

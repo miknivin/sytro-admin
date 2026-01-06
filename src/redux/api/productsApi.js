@@ -64,6 +64,16 @@ export const productApi = createApi({
       },
       invalidatesTags: ["Product"],
     }),
+    updateProductMedia: builder.mutation({
+      query({ id, body }) {
+        return {
+          url: `/products/${id}/images`,
+          method: "PATCH",
+          body,
+        };
+      },
+      invalidatesTags: ["Product"],
+    }),
 
     uploadKidsBagImages: builder.mutation({
       query({ formData }) {
@@ -164,4 +174,5 @@ export const {
   useDeleteAPlusContentImageMutation,
   useImageUploadMutation,
   useUpdateOfferEndTimeBulkMutation,
+  useUpdateProductMediaMutation,
 } = productApi;

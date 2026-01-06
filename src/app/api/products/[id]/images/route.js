@@ -9,7 +9,6 @@ export async function PATCH(request, { params }) {
 
   try {
     await dbConnect();
-    console.log(request.cookies, "cookies");
 
     const user = await isAuthenticatedUser(request);
     console.log(user, "user");
@@ -20,20 +19,30 @@ export async function PATCH(request, { params }) {
       authorizeRoles(user, "admin");
     }
 
-    const { images } = await request.json(); // array of { url: "https://...", name: "photo.jpg" }
+    const { images, youtubeUrl } = await request.json();
 
-    if (!images || !Array.isArray(images) || images.length === 0) {
+    if ((!images || !Array.isArray(images) || images.length === 0) && youtubeUrl === undefined) {
       return NextResponse.json(
-        { error: "No images provided" },
+        { error: "No images or YouTube URL provided" },
         { status: 400 },
       );
     }
 
+    const update = {};
+    if (images && Array.isArray(images) && images.length > 0) {
+      update.$push = { images: { $each: images } };
+    }
+    if (youtubeUrl !== undefined) {
+      // Ensure it's an array for the database
+      update.$set = { youtubeUrl: Array.isArray(youtubeUrl) ? youtubeUrl : [youtubeUrl].filter(Boolean) };
+    }
+
+    // Use findByIdAndUpdate but return the full product
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { $push: { images: { $each: images } } },
-      { new: true, runValidators: true },
-    );
+      update,
+      { new: true, runValidators: true }
+    ).lean();
 
     if (!updatedProduct) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
@@ -41,7 +50,7 @@ export async function PATCH(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      images: updatedProduct.images,
+      product: updatedProduct,
     });
   } catch (error) {
     console.error("Error saving images:", error);

@@ -2,7 +2,7 @@
 "use client";
 
 import GraySpinner from "@/components/common/GraySpinner";
-import { useDeleteProductImageMutation } from "@/redux/api/productsApi";
+import { useDeleteProductImageMutation, useUpdateProductMediaMutation } from "@/redux/api/productsApi";
 import { Product } from "@/types/product";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -22,9 +22,16 @@ export default function ProductImagesUpload({
   const [previews, setPreviews] = useState<string[]>([]);
   const [productImages, setProductImages] = useState(product.images);
   const [isUploading, setIsUploading] = useState(false);
+  const [youtubeUrls, setYoutubeUrls] = useState<string[]>(
+    Array.isArray(product.youtubeUrl) ? product.youtubeUrl : product.youtubeUrl ? [product.youtubeUrl] : []
+  );
+  const [newYoutubeUrl, setNewYoutubeUrl] = useState("");
+  const [isUpdatingYoutube, setIsUpdatingYoutube] = useState(false);
 
   const [deleteProductImage, { isLoading: isDeleting }] =
     useDeleteProductImageMutation();
+
+  const [updateProductMedia] = useUpdateProductMediaMutation();
 
   // Cleanup preview URLs
   useEffect(() => {
@@ -134,19 +141,16 @@ export default function ProductImagesUpload({
       // Save to database
       toast.loading("Saving to database...", { id: toastId });
 
-      const saveRes = await fetch(`/api/products/${product._id}/images`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ images: uploadedMedia }),
-        credentials: "include",
-      });
+      const saveData = await updateProductMedia({
+        id: product._id,
+        body: { images: uploadedMedia, youtubeUrl: youtubeUrls }
+      }).unwrap();
 
-      const saveData = await saveRes.json();
-      if (!saveRes.ok) throw new Error(saveData.error || "Failed to save");
-
-      toast.success("All media uploaded successfully!", { id: toastId });
-
-      setProductImages((prev) => [...prev, ...saveData.images]);
+      toast.success("All media and links updated successfully!", { id: toastId });
+      if (saveData.product) {
+        setProductImages(saveData.product.images);
+        setYoutubeUrls(saveData.product.youtubeUrl || []);
+      }
       setSelectedFiles([]);
       setPreviews([]);
       onClose();
@@ -154,6 +158,44 @@ export default function ProductImagesUpload({
       toast.error(error.message || "Upload failed.", { id: toastId });
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleAddYoutubeUrl = async () => {
+    if (!newYoutubeUrl.trim()) {
+      toast.error("Please enter a valid YouTube URL");
+      return;
+    }
+
+    const updatedUrls = [...youtubeUrls, newYoutubeUrl.trim()];
+    await saveYoutubeUrls(updatedUrls);
+    setNewYoutubeUrl("");
+  };
+
+  const handleRemoveYoutubeUrl = async (index: number) => {
+    const updatedUrls = youtubeUrls.filter((_, i) => i !== index);
+    await saveYoutubeUrls(updatedUrls);
+  };
+
+  const saveYoutubeUrls = async (urls: string[]) => {
+    setIsUpdatingYoutube(true);
+    const toastId = toast.loading("Updating YouTube links...");
+
+    try {
+      const data = await updateProductMedia({
+        id: product._id,
+        body: { youtubeUrl: urls }
+      }).unwrap();
+
+      if (data.product) {
+        setYoutubeUrls(data.product.youtubeUrl || []);
+      }
+
+      toast.success("YouTube links updated successfully!", { id: toastId });
+    } catch (error: any) {
+      toast.error(error.message || "Update failed.", { id: toastId });
+    } finally {
+      setIsUpdatingYoutube(false);
     }
   };
 
@@ -195,11 +237,65 @@ export default function ProductImagesUpload({
           type="file"
           multiple
           accept=".png,.jpg,.jpeg,.webp,.mp4,.webm,.mov,.avi"
-          className="file-input file-input-bordered w-full"
+          className="file-input file-input-bordered w-full text-black dark:text-white"
           onChange={handleFileChange}
           disabled={isUploading}
         />
       </label>
+
+      {/* YouTube Link Section */}
+      <div className="space-y-4 rounded-md border border-stroke p-4 dark:border-strokedark">
+        <label className="form-control w-full">
+          <div className="label">
+            <span className="label-text text-black dark:text-white">YouTube Video Links</span>
+            <span className="label-text-alt text-xs opacity-70">
+              Add multiple YouTube video URLs
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="input input-bordered w-full text-black dark:text-white"
+              value={newYoutubeUrl}
+              onChange={(e) => setNewYoutubeUrl(e.target.value)}
+              disabled={isUpdatingYoutube}
+            />
+            <button
+              type="button"
+              onClick={handleAddYoutubeUrl}
+              disabled={isUpdatingYoutube || !newYoutubeUrl.trim()}
+              className="btn btn-primary"
+            >
+              {isUpdatingYoutube ? "Adding..." : "Add Link"}
+            </button>
+          </div>
+        </label>
+
+        {/* List of existing links */}
+        {youtubeUrls.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <h4 className="text-sm font-medium text-black dark:text-white">Existing Links:</h4>
+            <div className="flex flex-col gap-2">
+              {youtubeUrls.map((url, index) => (
+                <div key={index} className="flex items-center justify-between rounded-md bg-gray-100 p-2 dark:bg-meta-4">
+                  <span className="truncate text-xs text-black dark:text-white" title={url}>
+                    {url}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveYoutubeUrl(index)}
+                    className="btn btn-ghost btn-xs text-error hover:bg-error/10"
+                    disabled={isUpdatingYoutube}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Previews */}
       {previews.length > 0 && (

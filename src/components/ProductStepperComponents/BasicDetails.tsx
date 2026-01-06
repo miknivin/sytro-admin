@@ -17,7 +17,10 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
   updateProduct,
   handleNextStep,
 }) => {
-  const [productState, setProductState] = useState<Product>(productProp);
+  const [productState, setProductState] = useState<Product>({
+    ...productProp,
+    youtubeUrl: Array.isArray(productProp.youtubeUrl) ? productProp.youtubeUrl : productProp.youtubeUrl ? [productProp.youtubeUrl as any] : []
+  });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -38,6 +41,36 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
       category: value,
     };
 
+    setProductState(updatedProduct);
+    updateProduct(updatedProduct);
+  };
+
+  const handleAddYoutubeUrl = () => {
+    const updatedProduct = {
+      ...productState,
+      youtubeUrl: [...(productState.youtubeUrl || []), ""],
+    };
+    setProductState(updatedProduct);
+    updateProduct(updatedProduct);
+  };
+
+  const handleYoutubeUrlChange = (index: number, value: string) => {
+    const updatedUrls = [...(productState.youtubeUrl || [])];
+    updatedUrls[index] = value;
+    const updatedProduct = {
+      ...productState,
+      youtubeUrl: updatedUrls,
+    };
+    setProductState(updatedProduct);
+    updateProduct(updatedProduct);
+  };
+
+  const handleRemoveYoutubeUrl = (index: number) => {
+    const updatedUrls = (productState.youtubeUrl || []).filter((_, i) => i !== index);
+    const updatedProduct = {
+      ...productState,
+      youtubeUrl: updatedUrls,
+    };
     setProductState(updatedProduct);
     updateProduct(updatedProduct);
   };
@@ -149,6 +182,38 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
                 placeholder="Enter offer price"
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               />
+            </div>
+          </div>
+          <div className="mb-4.5">
+            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+              YouTube Video Links
+            </label>
+            <div className="space-y-3">
+              {(productState.youtubeUrl || []).map((url, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={url}
+                    onChange={(e) => handleYoutubeUrlChange(index, e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveYoutubeUrl(index)}
+                    className="btn btn-error btn-outline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={handleAddYoutubeUrl}
+                className="btn btn-primary btn-outline btn-sm"
+              >
+                + Add Another Link
+              </button>
             </div>
           </div>
           <SelectGroupOne

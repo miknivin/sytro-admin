@@ -55,4 +55,7 @@ export interface Order {
   delhiveryCurrentStatus?: string | null;
   orderTracking?: OrderTracking[];
   shiprocketOrderId?: string;
+  discountAmount?: number;
+  couponDiscountType?: string;
+  couponDiscountValue?: number;
 }

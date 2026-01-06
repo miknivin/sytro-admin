@@ -58,4 +58,5 @@ export type Product = {
   createdAt: Date;
   updatedAt: Date;
   templateImages: any[];
+  youtubeUrl?: string[];
 };

@@ -8,10 +8,13 @@ import { orderApi } from "./api/orderApi";
 import { dashboardApi } from "./api/dashboardApi";
 import { websiteSettingsApi } from "./api/websiteSettingsApi";
 import { enquiryApi } from "./api/enquiryApi";
+import { couponApi } from "./api/couponApi";
+import couponReducer from "./features/couponSlice";
 export const store = configureStore({
   reducer: {
     auth: userReducer,
     cart: cartReducer,
+    coupon: couponReducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
     [productApi.reducerPath]: productApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
@@ -19,6 +22,7 @@ export const store = configureStore({
     [orderApi.reducerPath]: orderApi.reducer,
     [websiteSettingsApi.reducerPath]: websiteSettingsApi.reducer,
     [enquiryApi.reducerPath]: enquiryApi.reducer,
+    [couponApi.reducerPath]: couponApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat([
@@ -29,5 +33,6 @@ export const store = configureStore({
       orderApi.middleware,
       websiteSettingsApi.middleware,
       enquiryApi.middleware,
+      couponApi.middleware,
     ]),
 });

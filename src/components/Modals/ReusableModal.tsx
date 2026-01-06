@@ -2,12 +2,12 @@
 import React, { ReactNode } from 'react';
 
 interface ReusableModalProps {
-    title: string; 
+    title: string;
     onClose: () => void;
-    formContent: ReactNode; 
+    formContent: ReactNode;
 }
 
-export default function ReusableModal({ title, formContent,onClose }: ReusableModalProps) {
+export default function ReusableModal({ title, formContent, onClose }: ReusableModalProps) {
     return (
         <>
             <div
@@ -16,11 +16,11 @@ export default function ReusableModal({ title, formContent,onClose }: ReusableMo
                 aria-hidden="true"
                 className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50"
             >
-                <div className="relative p-4 w-full max-w-xl max-h-full">
+                <div className="relative p-4 w-full max-w-xl max-h-[90vh]">
                     {/* Modal content */}
-                    <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+                    <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700 flex flex-col max-h-[calc(90vh-2rem)]">
                         {/* Modal header */}
-                        <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
+                        <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200 flex-shrink-0">
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                 {title}
                             </h3>
@@ -49,7 +49,7 @@ export default function ReusableModal({ title, formContent,onClose }: ReusableMo
                             </button>
                         </div>
                         {/* Modal body */}
-                        <div className="p-4 md:p-5">
+                        <div className="p-4 md:p-5 overflow-y-auto">
                             {formContent}
                         </div>
                     </div>

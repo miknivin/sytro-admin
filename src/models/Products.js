@@ -140,9 +140,17 @@ const productSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    youtubeUrl: [{
+      type: String,
+      required: false,
+    }],
   },
   { timestamps: true },
 );
+
+if (mongoose.models.Product) {
+  delete mongoose.connection.models["Product"];
+}
 
 const Product =
   mongoose.models.Product || mongoose.model("Product", productSchema);
