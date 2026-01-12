@@ -164,6 +164,23 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
+    pickupScheduled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    pickupDate: {
+      type: String,
+      required: false,
+    },
+    pickupTime: {
+      type: String,
+      required: false,
+    },
+    pickupRequestId: {
+      type: String,
+      required: false,
+    },
     deliveredAt: Date,
   },
   { timestamps: true },

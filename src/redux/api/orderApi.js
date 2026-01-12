@@ -189,6 +189,27 @@ export const orderApi = createApi({
         }
       },
     }),
+    scheduleDelhiveryPickup: builder.mutation({
+      query: ({ orderId, pickupData }) => ({
+        url: `/orders/webhook/schedule-pickup/${orderId}`,
+        method: "POST",
+        body: pickupData,
+      }),
+      invalidatesTags: ["Order", "AdminOrders"], // Refresh order details
+      transformResponse: (response) => ({
+        success: response.success,
+        message: response.message,
+        pickupRequestId: response.pickupRequestId,
+      }),
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          console.log(`Pickup scheduled: ${data.pickupRequestId}`);
+        } catch (error) {
+          console.error("Error scheduling pickup:", error);
+        }
+      },
+    }),
   }),
 });
 
@@ -213,4 +234,6 @@ export const {
   useSearchSessionStartedOrdersQuery,
   useCreateDelhiveryOrderMutation,
   useSyncDelhiveryOrdersMutation,
+  useScheduleDelhiveryPickupMutation,
 } = orderApi;
+

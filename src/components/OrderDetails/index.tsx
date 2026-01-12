@@ -91,6 +91,8 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
         delhiveryStatus={delhiveryStatus}
         showCreateDelhiveryLink={!orderDetails.waybill}
         delhiveryError={delhiveryError || !orderDetails.waybill}
+        hasWaybill={!!orderDetails.waybill}
+        waybill={orderDetails.waybill || ""}
       />
       <div className="mt-10 flex w-full flex-col items-stretch justify-center space-y-4 md:space-y-6 xl:flex-row xl:space-x-8 xl:space-y-0">
         <div className="flex w-full flex-col items-start justify-start space-y-4 md:space-y-6 xl:space-y-8">
