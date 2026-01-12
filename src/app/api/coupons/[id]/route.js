@@ -12,7 +12,7 @@ export async function GET(req, { params }) {
     const user = await isAuthenticatedUser(req);
     if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Need to login' },
+        { success: false, message: 'Need to login as admin' },
         { status: 401 }
       );
     }
