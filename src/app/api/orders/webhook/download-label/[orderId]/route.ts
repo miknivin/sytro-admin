@@ -96,7 +96,7 @@ export async function GET(
 
         const disposition = isView ? "inline" : `attachment; filename="delhivery-label-${order.waybill}.pdf"`;
 
-        return new NextResponse(finalPdfBuffer, {
+        return new NextResponse(finalPdfBuffer as any, {
             status: 200,
             headers: {
                 "Content-Type": "application/pdf",
