@@ -86,7 +86,7 @@ export async function PUT(req, { params }) {
     );
   } catch (error) {
     return NextResponse.json(
-      { success: false, message: error.message || 'Internal Server Error' },
+      { success: false, message: error.message || 'Internal Server Errorr' },
       { status: 500 }
     );
   }
