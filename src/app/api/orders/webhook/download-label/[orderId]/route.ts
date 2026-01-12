@@ -56,7 +56,7 @@ export async function GET(
             responseType: "arraybuffer",
         });
 
-        // Convert response to Buffer
+        // Convert response to Bufferr
         const buffer = Buffer.from(response.data);
         let finalPdfBuffer: Buffer;
 
