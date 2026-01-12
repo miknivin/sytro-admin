@@ -22,7 +22,7 @@ export async function GET(req, { params }) {
     const coupon = await Coupon.findById(params.id);
     if (!coupon) {
       return NextResponse.json(
-        { success: false, message: 'Coupon not found' },
+        { success: false, message: 'Coupon not found 404' },
         { status: 404 }
       );
     }
