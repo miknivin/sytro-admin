@@ -6,65 +6,75 @@ export async function POST(req) {
   await dbConnect();
 
   try {
-    // Extract webhook data
-    const { sheetName, row, column, newValue, columnCValue } = await req.json();
+    const body = await req.json();
+    const { field, orderId, newValue, columnLetter, row, sheetName } = body;
 
-    // Log the incoming payload
-    console.log("Webhook received:", {
-      sheetName,
+    console.log("GSheet webhook:", {
       row,
-      column,
+      sheetName,
+      column: columnLetter,
+      field,
+      orderId,
       newValue,
-      columnCValue,
     });
 
-    // Validate that columnCValue and newValue exist
-    if (!columnCValue || !newValue) {
+    // ── Security ────────────────────────────────────────
+    const authHeader = req.headers.get("authorization");
+    const token = authHeader?.split(" ")?.[1];
+    const expectedToken = process.env.GSHEET_EXPECTED_TOKEN;
+
+    if (!token || token !== expectedToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    // ── Validation ──────────────────────────────────────
+    if (!orderId || !field || newValue === undefined) {
       return NextResponse.json(
-        {
-          error:
-            "columnCValue (order ID) and newValue (order status) are required",
-        },
+        { error: "Missing required fields: orderId, field, newValue" },
         { status: 400 },
       );
     }
 
-    // Get the token from the Authorization header
-    const authHeader = req.headers.get("authorization");
-    const token = authHeader?.split(" ")[1]; // Extract token after "Bearer "
-
-    // Define the expected token (match with the one in Google Apps Script)
-    const expectedToken =
-      "803d7a40bb5086e57b6caf1a2f7815a4b41572ca4c16e7defc9c20cfee7ded3e"; // Replace with the same token
-
-    // Validate the token
-    if (!token || token !== expectedToken) {
+    // Only allow these two fields from sheet (security)
+    const allowedFields = ["orderStatus", "waybill"];
+    if (!allowedFields.includes(field)) {
       return NextResponse.json(
-        { error: "Invalid or missing token" },
-        { status: 403 },
+        { error: `Unsupported field: ${field}` },
+        { status: 400 },
       );
     }
 
-    // Use columnCValue as the order _id and newValue as the orderStatus
-    const id = columnCValue;
-    const orderStatus = newValue;
+    // Prepare atomic update
+    const update = { $set: { [field]: newValue.trim() || null } };
 
-    const order = await Order.findById(id);
+    // If waybill is being cleared → allow null/empty
+    if (field === "waybill" && !newValue.trim()) {
+      update.$set.waybill = null;
+      // Optional: also clear related tracking if needed
+      // update.$set.orderTracking = [];
+    }
 
-    if (!order) {
+    const updatedOrder = await Order.findOneAndUpdate(
+      { _id: orderId },
+      update,
+      { new: true, runValidators: true },
+    );
+
+    if (!updatedOrder) {
+      console.warn(`Order not found: ${orderId}`);
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    order.orderStatus = orderStatus;
-    await order.save();
-
     return NextResponse.json({
       success: true,
-      message: "Order status updated via webhook",
-      order,
+      message: `${field} updated to "${newValue}"`,
+      order: updatedOrder,
     });
   } catch (error) {
-    console.error("Error processing webhook:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("Webhook error:", error);
+    return NextResponse.json(
+      { error: "Internal server error", details: error.message },
+      { status: 500 },
+    );
   }
 }
