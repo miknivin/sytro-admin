@@ -50,7 +50,6 @@ export async function POST(req) {
     // If waybill is being cleared → allow null/empty
     if (field === "waybill" && !newValue.trim()) {
       update.$set.waybill = null;
-      // Optional: also clear related tracking if needed
       // update.$set.orderTracking = [];
     }
 
