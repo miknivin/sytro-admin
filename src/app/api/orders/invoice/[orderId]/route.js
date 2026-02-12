@@ -4,7 +4,8 @@ import path from "path";
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 
-import { Order } from "@/models/Order";
+import Order from "@/models/Order";
+
 import { uploadToS3 } from "@/utlis/uploadToS3";
 import dbConnect from "@/lib/db/connection";
 
