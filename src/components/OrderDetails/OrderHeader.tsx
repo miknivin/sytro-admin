@@ -42,15 +42,25 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
     try {
       const url = await getInvoiceUrl(orderId).unwrap();
 
-      // Force download
+      // Fetch PDF content
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+
+      // Create temporary local URL
+      const blobUrl = window.URL.createObjectURL(blob);
+
       const link = document.createElement("a");
-      link.href = url;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
+      link.href = blobUrl;
       link.download = `invoice-${orderId.slice(-6)}.pdf`;
       document.body.appendChild(link);
       link.click();
+
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
 
       toast.success("Invoice downloaded successfully");
     } catch (err: any) {
