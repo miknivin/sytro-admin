@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invoice</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap");
+      body {
+        font-family: "Noto Sans", Arial, sans-serif;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      .header img {
+        width: 200px;
+        height: auto;
+        object-fit: contain;
+      }
+      .invoice-details {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      .office-address,
+      .to {
+        text-align: left;
+      }
+      table {
+        margin: 0 auto;
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: right; /* Right-align numbers for better readability */
+      }
+      th:first-child,
+      td:first-child {
+        text-align: left; /* Left-align description */
+      }
+      th {
+        background-color: #fefefe;
+        color: #000;
+      }
+      .total {
+        font-weight: bold;
+      }
+      .rupee {
+        font-family: "Noto Sans", Arial !important;
+        font-weight: bold;
+        color: #000;
+      }
+      .thank-you {
+        text-align: center;
+        margin-top: 20px;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 12px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div class="header">
+        <img
+          src="https://www.sytrobags.com/images/logo/logo@2x.png"
+          alt="Sytro Bags Logo"
+        />
+        <h1><b>INVOICE</b></h1>
+      </div>
+      <div class="invoice-details">
+        <div class="office-address">
+          <p><b>Office Address</b></p>
+          <p>Sytro Bags</p>
+          <p>Sytrobags Panakal tower North Basin Road</p>
+          <p>Broadway Ernakulam, Kochi, Kerala 682031</p>
+          <p><b>GST No:</b> 32AZDPN8562G1ZA</p>
+        </div>
+        <div class="to">
+          <p><b>To</b></p>
+          <p><%= order.shippingInfo.fullName %></p>
+          <p>
+            <%= order.shippingInfo.address %>, <%= order.shippingInfo.city %>,
+            <%= order.shippingInfo.state %>, <%= order.shippingInfo.zipCode %>,
+            <%= order.shippingInfo.country %>
+          </p>
+          <p>
+            <b>Date</b> <%= new Date(order.createdAt).toLocaleDateString() %>
+          </p>
+          <p><b>Invoice</b> #<%= order._id.toString().slice(-6) %></p>
+        </div>
+      </div>
+      <table>
+        <tr>
+          <th><b>Items Description</b></th>
+          <th><b>Unit Price (incl. GST)</b></th>
+          <th><b>Qty</b></th>
+          <th><b>Taxable Value</b></th>
+          <th><b>Tax (18%)</b></th>
+          <th><b>Total (incl. GST)</b></th>
+        </tr>
+        <% 
+          let subtotalExcl = 0;
+          let totalTax = 0;
+          order.orderItems.forEach(item => { 
+            const lineTotalIncl = Number(item.price) * item.quantity;
+            const taxable = lineTotalIncl / 1.18;
+            const tax = lineTotalIncl - taxable;
+            subtotalExcl += taxable;
+            totalTax += tax;
+        %>
+        <tr>
+          <td>
+            <b><%= item.name %></b>
+            <% if (item.variant) { %>
+              <br /><%= item.variant %>
+            <% } %>
+          </td>
+          <td><span class="rupee">₹</span><%= Number(item.price).toFixed(2) %></td>
+          <td><%= item.quantity %></td>
+          <td><span class="rupee">₹</span><%= taxable.toFixed(2) %></td>
+          <td><span class="rupee">₹</span><%= tax.toFixed(2) %></td>
+          <td><span class="rupee">₹</span><%= lineTotalIncl.toFixed(2) %></td>
+        </tr>
+        <% }) %>
+        <tr>
+          <td colspan="3" class="total">SUBTOTAL (excl. GST)</td>
+          <td colspan="3"><span class="rupee">₹</span><%= subtotalExcl.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <td colspan="3" class="total">GST TOTAL (18%)</td>
+          <td colspan="3"><span class="rupee">₹</span><%= totalTax.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <td colspan="3" class="total">SUBTOTAL (incl. GST)</td>
+          <td colspan="3"><span class="rupee">₹</span><%= Number(order.itemsPrice).toFixed(2) %></td>
+        </tr>
+        <tr>
+          <td colspan="3" class="total">SHIPPING</td>
+          <td colspan="3"><span class="rupee">₹</span><%= Number(order.shippingAmount).toFixed(2) %></td>
+        </tr>
+        <% if (order.couponApplied !== 'No' && order.discountAmount > 0) { %>
+        <tr>
+          <td colspan="3" class="total">DISCOUNT</td>
+          <td colspan="3">-<span class="rupee">₹</span><%= Number(order.discountAmount).toFixed(2) %></td>
+        </tr>
+        <% } %>
+        <tr>
+          <td colspan="3" class="total">GRAND TOTAL</td>
+          <td colspan="3"><span class="rupee">₹</span><%= Number(order.totalAmount).toFixed(2) %></td>
+        </tr>
+      </table>
+      <div class="thank-you">
+        <p><b>Thank you for your Business</b></p>
+      </div>
+      <div class="footer">
+        <p>+91 8921570685</p>
+        <p>support@sytrobags.com</p>
+      </div>
+    </div>
+  </body>
+</html>

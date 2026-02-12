@@ -52,7 +52,6 @@ export const uploadSinglePart = async ({
       const fileLocation = response?.fileKey;
       // Construct the file URL using the provided CloudFront URL
       const fileUrl = `https://dt23o2b8s8xs5.cloudfront.net/${fileLocation}`;
-      console.log(fileUrl, "file url");
 
       toast.success(`File ${fileName} uploaded successfully`);
       return { url: fileUrl, public_id: fileName }; // Use fileName as public_id since key is filename in controller

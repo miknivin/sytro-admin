@@ -210,6 +210,12 @@ export const orderApi = createApi({
         }
       },
     }),
+
+    getInvoiceUrl: builder.query({
+      query: (orderId) => `/orders/invoice/${orderId}`,
+      providesTags: ["Order"],
+      transformResponse: (response) => response.invoiceUrl || response,
+    }),
   }),
 });
 
@@ -235,5 +241,5 @@ export const {
   useCreateDelhiveryOrderMutation,
   useSyncDelhiveryOrdersMutation,
   useScheduleDelhiveryPickupMutation,
+  useLazyGetInvoiceUrlQuery,
 } = orderApi;
-

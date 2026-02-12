@@ -4,6 +4,7 @@ import {
   useGetAdminOrdersQuery,
   useDeleteOrderMutation,
   useSyncDelhiveryOrdersMutation,
+  useLazyGetInvoiceUrlQuery,
 } from "@/redux/api/orderApi";
 import { Order } from "@/types/order";
 import Link from "next/link";
@@ -20,6 +21,7 @@ import CsvIcon from "../SvgIcons/CsvIcon"; // replaces your old Download icon
 import { Tooltip } from "@mui/material";
 import Spinner from "../common/Spinner"; // for better loading states
 import SyncIcon from "../SvgIcons/SyncIcons";
+import InvoiceIcon from "../SvgIcons/InvoiceIcon";
 // Define all hooks at the top
 const OrderTable = () => {
   const { data, isLoading, isError } = useGetAdminOrdersQuery(null);
@@ -32,13 +34,14 @@ const OrderTable = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [syncDelhiveryOrders, { isLoading: isSyncing }] =
     useSyncDelhiveryOrdersMutation();
-  // Handle search input
+
+  const [getInvoiceUrl, { isFetching: isGeneratingInvoice }] =
+    useLazyGetInvoiceUrlQuery();
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page on search
+    setCurrentPage(1);
   };
 
-  // Filter orders based on search query
   const filteredOrders = useMemo(() => {
     if (!data?.orders || !searchQuery) return data?.orders || [];
     const queryLower = searchQuery.toLowerCase();
@@ -155,6 +158,26 @@ const OrderTable = () => {
     return <p>Error loading orders.</p>;
   }
 
+  const handleGetInvoice = async (orderId: string) => {
+    try {
+      const url = await getInvoiceUrl(orderId).unwrap();
+
+      // Force download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `invoice-${orderId.slice(-6)}.pdf`; // nice filename e.g. invoice-abc123.pdf
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Optional: show success feedback
+      toast.success("Invoice downloaded successfully");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to generate/download invoice");
+      console.error("Invoice error:", err);
+    }
+  };
+
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark xl:pb-1">
@@ -264,6 +287,12 @@ const OrderTable = () => {
                     >
                       <PreviewIcon />
                     </Link>
+                    <button
+                      onClick={() => handleGetInvoice(order._id)}
+                      className="btn border-none bg-gray-300 p-3 text-gray-200 hover:bg-primary/80 dark:bg-gray-700"
+                    >
+                      <InvoiceIcon />
+                    </button>
                     <button
                       onClick={() => openDeleteModal(order)}
                       className="btn border-none bg-red-600 p-3 text-gray-200 hover:bg-red-600/80"
