@@ -3,10 +3,10 @@ import ejs from "ejs";
 import path from "path";
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
-import { dbConnect } from "@/lib/db/connection";
 
 import { Order } from "@/models/Order";
 import { uploadToS3 } from "@/utlis/uploadToS3";
+import dbConnect from "@/lib/db/connection";
 
 export async function GET(request, { params }) {
   try {
