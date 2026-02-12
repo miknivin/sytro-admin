@@ -291,7 +291,7 @@ const OrderTable = () => {
                       onClick={() => handleGetInvoice(order._id)}
                       className="btn border-none bg-gray-300 p-3 text-gray-200 hover:bg-primary/80 dark:bg-gray-700"
                     >
-                      <InvoiceIcon />
+                      {isGeneratingInvoice ? <Spinner /> : <InvoiceIcon />}
                     </button>
                     <button
                       onClick={() => openDeleteModal(order)}

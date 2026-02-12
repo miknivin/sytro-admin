@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import RadioDropDown from "./RadioDropDown";
 import toast from "react-hot-toast";
-import { useCreateDelhiveryOrderMutation } from "@/redux/api/orderApi";
+import {
+  useCreateDelhiveryOrderMutation,
+  useLazyGetInvoiceUrlQuery,
+} from "@/redux/api/orderApi";
 import SchedulePickupModal from "../Modals/SchedulePickupModal";
+import InvoiceIcon from "../SvgIcons/InvoiceIcon";
+import Spinner from "../common/Spinner";
 
 // Define the type for the props
 interface OrderHeaderProps {
@@ -31,7 +36,27 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   const [createDelhiveryOrder, { isLoading }] =
     useCreateDelhiveryOrderMutation();
   const [showPickupModal, setShowPickupModal] = useState(false);
+  const [getInvoiceUrl, { isFetching: isGeneratingInvoice }] =
+    useLazyGetInvoiceUrlQuery();
+  const handleGetInvoice = async (orderId: string) => {
+    try {
+      const url = await getInvoiceUrl(orderId).unwrap();
 
+      // Force download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `invoice-${orderId.slice(-6)}.pdf`; // nice filename e.g. invoice-abc123.pdf
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Optional: show success feedback
+      toast.success("Invoice downloaded successfully");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to generate/download invoice");
+      console.error("Invoice error:", err);
+    }
+  };
   const handleCreateDelhiveryOrder = async () => {
     try {
       const response = await createDelhiveryOrder(orderId).unwrap();
@@ -65,25 +90,33 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
 
         <div className="flex flex-col gap-3">
           {/* Show live Delhivery status if available, otherwise show status dropdown */}
-          {delhiveryStatus && !delhiveryError ? (
-            <div className="flex h-full items-center justify-center">
-              <span className="inline-block min-w-[220px] rounded-lg bg-blue-700 px-6 py-3 text-center text-base font-semibold text-white shadow-md">
-                {delhiveryStatus}
-              </span>
-            </div>
-          ) : (
-            <RadioDropDown orderStatus={orderStatus} orderId={orderId} />
-          )}
-
+          <div className="flex items-center gap-2">
+            {delhiveryStatus && !delhiveryError ? (
+              <div className="flex h-full items-center justify-center">
+                <span className="inline-block min-w-[220px] rounded-lg bg-blue-700 px-6 py-3 text-center text-base font-semibold text-white shadow-md">
+                  {delhiveryStatus}
+                </span>
+              </div>
+            ) : (
+              <RadioDropDown orderStatus={orderStatus} orderId={orderId} />
+            )}
+            <button
+              onClick={() => handleGetInvoice(orderId)}
+              className="btn border-none bg-gray-300 px-3 py-2.5 text-gray-200 hover:bg-primary/80 dark:bg-gray-700"
+            >
+              {isGeneratingInvoice ? <Spinner /> : <InvoiceIcon />}
+            </button>
+          </div>
           {/* Create Delhivery Order button (only when instructed) */}
           {showCreateDelhiveryLink && (
             <button
               onClick={handleCreateDelhiveryOrder}
               disabled={isLoading}
-              className={`inline-block text-center text-base font-semibold underline focus:outline-none focus:ring-4 focus:ring-blue-300 ${isLoading
-                ? "cursor-not-allowed text-blue-300"
-                : "text-info hover:text-blue-600"
-                }`}
+              className={`inline-block text-center text-base font-semibold underline focus:outline-none focus:ring-4 focus:ring-blue-300 ${
+                isLoading
+                  ? "cursor-not-allowed text-blue-300"
+                  : "text-info hover:text-blue-600"
+              }`}
             >
               {isLoading ? "Creating..." : "Create Delhivery Order"}
             </button>
