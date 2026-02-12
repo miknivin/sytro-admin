@@ -45,12 +45,13 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
       // Force download
       const link = document.createElement("a");
       link.href = url;
-      link.download = `invoice-${orderId.slice(-6)}.pdf`; // nice filename e.g. invoice-abc123.pdf
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.download = `invoice-${orderId.slice(-6)}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      // Optional: show success feedback
       toast.success("Invoice downloaded successfully");
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to generate/download invoice");
