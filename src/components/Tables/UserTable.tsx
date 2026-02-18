@@ -41,7 +41,7 @@ const UserTable = () => {
 
     const queryLower = searchQuery.toLowerCase();
     return users.filter((user: User) => {
-      const userId = (user._id || "").toLowerCase();
+      const userId = (user._id || "").toString().toLowerCase();
       const name = (user.name || "").toLowerCase();
       const email = (user.email || "").toLowerCase();
       const role = (user.role || "").toLowerCase();
@@ -208,7 +208,7 @@ const UserTable = () => {
 
                 <td className="flex gap-5 px-4 py-5">
                   <button
-                    onClick={() => openEditModal(user._id || "")}
+                    onClick={() => openEditModal(user._id?.toString() || "")}
                     className="btn border-none bg-primary p-3 hover:bg-primary/80"
                   >
                     <EditIcon />
