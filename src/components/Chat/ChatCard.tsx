@@ -27,7 +27,7 @@ const ChatCard = () => {
         {data?.users.slice(0, 5)?.map((user: User) => (
           <div
             className="flex items-center gap-5 px-7.5 py-3 hover:bg-gray-3 dark:hover:bg-meta-4"
-            key={user._id}
+            key={user._id?.toString()}
           >
             <div className="relative h-14 w-14 rounded-full">
               <Image
