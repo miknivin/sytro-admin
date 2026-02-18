@@ -6,6 +6,7 @@ import { Order } from "@/types/order";
 import { User } from "@/types/user";
 
 import { useGetAdminUsersQuery } from "@/redux/api/userApi";
+import mongoose from "mongoose";
 
 interface UserSelectionProps {
   orderData: Order;
@@ -30,7 +31,7 @@ const UserSelection: React.FC<UserSelectionProps> = ({
     newValue: User | null,
   ) => {
     setSelectedUser(newValue);
-    updateOrderData({ user: newValue?._id || "" });
+    updateOrderData({ user: newValue?._id || new mongoose.Types.ObjectId() });
   };
 
   const handleCreateUser = async () => {

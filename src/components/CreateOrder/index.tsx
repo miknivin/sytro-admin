@@ -7,6 +7,7 @@ import ShippingDetailsForm from "./ShippingDetails";
 import ItemsSelection from "./ItemSelection";
 import { useCreateNewOrderMutation } from "@/redux/api/orderApi";
 import UserSelection from "./UserSelection";
+import mongoose from "mongoose";
 
 const CreateAdminOrder = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -21,16 +22,21 @@ const CreateAdminOrder = () => {
       zipCode: "",
       country: "India",
     },
-    _id: "",
+    _id: new mongoose.Types.ObjectId(),
     itemsPrice: 0,
     taxAmount: 0,
+    remainingAmount: 0,
+    codAmount: 0,
+    codChargeCollected: 0,
     shippingAmount: 0,
+    advancePaid: 0,
     totalAmount: 0,
     orderItems: [],
     createdAt: new Date(),
+    updatedAt: new Date(),
     orderStatus: "Processing" as "Processing" | "Shipped" | "Delivered",
-    user: "",
-    paymentMethod: "Online" as "COD" | "Online",
+    user: new mongoose.Types.ObjectId(),
+    paymentMethod: "Online" as "COD" | "Online" | "Partial-COD",
   });
 
   const nextStep = () => {
@@ -88,14 +94,20 @@ const CreateAdminOrder = () => {
           zipCode: "",
           country: "India",
         },
-        _id: "",
+        _id: new mongoose.Types.ObjectId(),
         itemsPrice: 0,
+        remainingAmount: 0,
+        codAmount: 0,
+        codChargeCollected: 0,
         taxAmount: 0,
+        advancePaid: 0,
+
         shippingAmount: 0,
         totalAmount: 0,
         orderItems: [],
         orderStatus: "Processing",
-        user: "",
+        user: new mongoose.Types.ObjectId(),
+        updatedAt: new Date(),
         createdAt: new Date(),
         paymentMethod: "Online",
       });
