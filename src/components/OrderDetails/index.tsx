@@ -84,9 +84,9 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
       </div>
 
       <OrderHeader
-        orderNumber={orderDetails._id.slice(-6)}
+        orderNumber={orderDetails._id.toString().slice(-6)}
         orderDate={formatDate(orderDetails.createdAt)}
-        orderId={orderDetails._id}
+        orderId={orderDetails._id.toString()}
         orderStatus={orderDetails.orderStatus}
         delhiveryStatus={delhiveryStatus}
         showCreateDelhiveryLink={!orderDetails.waybill}

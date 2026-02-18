@@ -46,7 +46,7 @@ const OrderTable = () => {
     if (!data?.orders || !searchQuery) return data?.orders || [];
     const queryLower = searchQuery.toLowerCase();
     return data.orders.filter((order: Order) => {
-      const orderId = order._id.toLowerCase();
+      const orderId = order._id.toString().toLowerCase();
       const fullName = order.shippingInfo.fullName?.toLowerCase() || "";
       const phoneNo = order.shippingInfo.phoneNo.toLowerCase() || "";
       return (
@@ -253,7 +253,13 @@ const OrderTable = () => {
                 Customer
               </th>
               <th scope="col" className="px-6 py-3 text-center">
+                Payment method
+              </th>
+              <th scope="col" className="px-6 py-3 text-center">
                 Total
+              </th>
+              <th scope="col" className="px-6 py-3 text-center">
+                Remaining
               </th>
               <th scope="col" className="px-6 py-3 text-center">
                 Status
@@ -269,19 +275,23 @@ const OrderTable = () => {
           <tbody>
             {paginatedOrders?.map((order: Order) => (
               <tr
-                key={order._id}
+                key={order._id.toString()}
                 className="border-b border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
               >
                 <th
                   scope="row"
                   className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
                 >
-                  {order._id.slice(-6)}
+                  {order._id.toString().slice(-6)}
                 </th>
                 <td className="px-6 py-4 text-center">
                   {order.shippingInfo.fullName || "N/A"}
                 </td>
+                <td className="px-6 py-4 text-center">{order.paymentMethod}</td>
                 <td className="px-6 py-4 text-center">₹{order.totalAmount}</td>
+                <td className="px-6 py-4 text-center">
+                  ₹{order?.remainingAmount || 0}
+                </td>
                 <td className="px-6 py-4 text-center">
                   {order.delhiveryCurrentStatus || order.orderStatus}
                 </td>
@@ -301,7 +311,7 @@ const OrderTable = () => {
                       <PreviewIcon />
                     </Link>
                     <button
-                      onClick={() => handleGetInvoice(order._id)}
+                      onClick={() => handleGetInvoice(order._id.toString())}
                       className="btn border-none bg-gray-300 p-3 text-gray-200 hover:bg-primary/80 dark:bg-gray-700"
                     >
                       {isGeneratingInvoice ? <Spinner /> : <InvoiceIcon />}
@@ -339,7 +349,7 @@ const OrderTable = () => {
       {isDeleteModalOpen && currentOrder && (
         <ReusableAlert
           title="Confirm Deletion"
-          content={`Are you sure you want to delete order "${currentOrder._id.slice(-6)}"?`}
+          content={`Are you sure you want to delete order "${currentOrder._id.toString().slice(-6)}"?`}
           func={handleDelete}
           isOpen={isDeleteModalOpen}
           onClose={closeDeleteModal}
