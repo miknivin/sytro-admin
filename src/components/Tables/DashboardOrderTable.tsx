@@ -76,14 +76,14 @@ const DashboardOrderTable = ({ limit }: OrderTableProps) => {
           <tbody>
             {data.orders?.slice(0, displayLimit).map((order: Order) => (
               <tr
-                key={order._id}
+                key={order._id.toString()}
                 className="border-b border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
               >
                 <th
                   scope="row"
                   className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
                 >
-                  {order._id.slice(-6)}
+                  {order._id.toString().slice(-6)}
                 </th>
                 <td className="px-6 py-4 text-center">
                   {order.shippingInfo.fullName}
