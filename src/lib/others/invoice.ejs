@@ -150,10 +150,28 @@
       <td class="total">₹<%= order.itemsPrice.toFixed(2) %></td>
     </tr>
 
-    <tr>
-      <td colspan="5" class="total">Shipping</td>
-      <td>₹<%= order.shippingAmount.toFixed(2) %></td>
-    </tr>
+   <!-- Shipping or COD Charge fallback -->
+<% 
+  let displayShipping = 0;
+  let displayLabel = "Shipping";
+
+  if (order.shippingAmount > 0) {
+    displayShipping = order.shippingAmount;
+  } else if (
+    (order.shippingAmount === 0 || order.shippingAmount == null) && 
+    order.codChargeCollected > 0
+  ) {
+    displayShipping = order.codChargeCollected;
+    displayLabel = "COD Charge";
+  }
+%>
+
+<% if (displayShipping > 0) { %>
+  <tr>
+    <td colspan="5" class="total"><%= displayLabel %></td>
+    <td class="total">₹<%= displayShipping.toFixed(2) %></td>
+  </tr>
+<% } %>
 
     <% if (order.discountAmount > 0) { %>
     <tr>
@@ -176,7 +194,7 @@
     <% if (order.paymentMethod === "Partial-COD") { %>
       Advance Paid (Online): ₹<%= order.advancePaid.toFixed(2) %><br />
       Balance Payable on Delivery: <b>₹<%= order.codAmount.toFixed(2) %></b><br /><br />
-      ⚠ <b>Courier must collect ₹<%= order.codAmount.toFixed(2) %> at delivery.</b>
+       <b>Courier must collect ₹<%= order.codAmount.toFixed(2) %> at delivery.</b>
     <% } else if (order.paymentMethod === "COD") { %>
       Amount to Collect on Delivery: <b>₹<%= order.totalAmount.toFixed(2) %></b>
     <% } else { %>
@@ -187,7 +205,7 @@
   <!-- FOOTER -->
   <div class="footer">
     <p>Thank you for shopping with Sytro Bags</p>
-    <p>📞 +91 8921570685 | ✉ support@sytrobags.com</p>
+    <p> +91 8921570685 | support@sytrobags.com</p>
     <p>This is a system-generated invoice</p>
   </div>
 
