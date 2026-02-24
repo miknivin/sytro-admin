@@ -37,7 +37,8 @@ export const orderApi = createApi({
         const queryParams = params || {};
         const searchParams = new URLSearchParams();
 
-        if (queryParams.page) searchParams.set("page", String(queryParams.page));
+        if (queryParams.page)
+          searchParams.set("page", String(queryParams.page));
         if (queryParams.limit)
           searchParams.set("limit", String(queryParams.limit));
         if (queryParams.search) searchParams.set("search", queryParams.search);
@@ -49,7 +50,7 @@ export const orderApi = createApi({
         }
 
         const queryString = searchParams.toString();
-        return `orders/admin/getAllOrders${queryString ? `?${queryString}` : ""}`;
+        return `orders/admin/orders${queryString ? `?${queryString}` : ""}`;
       },
       providesTags: ["AdminOrders"],
     }),

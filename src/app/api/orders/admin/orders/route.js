@@ -4,6 +4,11 @@ import { authorizeRoles, isAuthenticatedUser } from "@/middlewares/auth";
 import dbConnect from "@/lib/db/connection";
 import mongoose from "mongoose";
 
+// Helper to escape special regex characters
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export async function GET(req) {
   try {
     await dbConnect();
@@ -13,7 +18,7 @@ export async function GET(req) {
     if (!user) {
       return NextResponse.json(
         { success: false, message: "Need to login" },
-        { status: 400 },
+        { status: 401 },
       );
     }
 
@@ -28,17 +33,21 @@ export async function GET(req) {
           .map((item) => item.trim())
           .filter(Boolean)
       : [];
+
     const page = Math.max(Number(searchParams.get("page")) || 1, 1);
     const limit = Math.max(Number(searchParams.get("limit")) || 8, 1);
 
     const query = {};
 
-    if (paymentMethodsParam !== null) {
+    if (paymentMethods.length > 0) {
       query.paymentMethod = { $in: paymentMethods };
     }
 
     if (search) {
-      const regex = new RegExp(search, "i");
+      // Escape special characters so + - * ? etc don't break the regex
+      const escaped = escapeRegex(search);
+      const regex = new RegExp(escaped, "i");
+
       const searchConditions = [
         { "shippingInfo.fullName": { $regex: regex } },
         { "shippingInfo.phoneNo": { $regex: regex } },
@@ -47,15 +56,18 @@ export async function GET(req) {
           $expr: {
             $regexMatch: {
               input: { $toString: "$_id" },
-              regex: search,
+              regex: escaped, // important: also escape for $expr
               options: "i",
             },
           },
         },
       ];
 
+      // If it's a valid ObjectId, also allow exact match on _id
       if (mongoose.Types.ObjectId.isValid(search)) {
-        searchConditions.push({ _id: new mongoose.Types.ObjectId(search) });
+        searchConditions.push({
+          _id: new mongoose.Types.ObjectId(search),
+        });
       }
 
       query.$or = searchConditions;
@@ -69,7 +81,8 @@ export async function GET(req) {
     const orders = await Order.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean(); // ← optional: faster if you don't need Mongoose documents
 
     return NextResponse.json(
       {
@@ -85,8 +98,9 @@ export async function GET(req) {
       { status: 200 },
     );
   } catch (error) {
+    console.error("Orders fetch error:", error);
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message: error.message || "Server error" },
       { status: 500 },
     );
   }
