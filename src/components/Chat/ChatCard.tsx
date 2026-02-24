@@ -5,8 +5,7 @@ import { useGetAdminUsersQuery } from "@/redux/api/userApi";
 import Spinner from "../common/Spinner";
 
 const ChatCard = () => {
-  const { data, error, isLoading } = useGetAdminUsersQuery(null);
-
+  const { data, error, isLoading } = useGetAdminUsersQuery({ limit: 5 });
   if (isLoading) return <Spinner />;
   if (error) return <p>Error getting users</p>;
 
@@ -37,8 +36,9 @@ const ChatCard = () => {
                 src={user?.avatar?.url || "/default-avatar.png"} // Use default image if avatar is missing
                 alt="User"
                 style={{
-                  width: "auto",
-                  height: "auto",
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
                 }}
               />
               {/* <span

@@ -40,10 +40,11 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       public_id: String,
-      url: String, // Provide a default value (e.g., "user.jpg") for the avatar
+      url: String,
     },
     role: {
       type: String,
+      enum: ["user", "admin", "vendor"],
       default: "user",
       immutable: true,
     },
@@ -55,7 +56,7 @@ const userSchema = new mongoose.Schema(
       default: "Email/Password", // Provide a default value
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Hash password before saving

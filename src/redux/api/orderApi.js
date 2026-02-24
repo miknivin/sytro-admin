@@ -33,7 +33,24 @@ export const orderApi = createApi({
       },
     }),
     getAdminOrders: builder.query({
-      query: () => `orders/admin/getAllOrders`,
+      query: (params) => {
+        const queryParams = params || {};
+        const searchParams = new URLSearchParams();
+
+        if (queryParams.page) searchParams.set("page", String(queryParams.page));
+        if (queryParams.limit)
+          searchParams.set("limit", String(queryParams.limit));
+        if (queryParams.search) searchParams.set("search", queryParams.search);
+        if (Array.isArray(queryParams.paymentMethods)) {
+          searchParams.set(
+            "paymentMethods",
+            queryParams.paymentMethods.join(","),
+          );
+        }
+
+        const queryString = searchParams.toString();
+        return `orders/admin/getAllOrders${queryString ? `?${queryString}` : ""}`;
+      },
       providesTags: ["AdminOrders"],
     }),
     updateOrder: builder.mutation({

@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["lh3.googleusercontent.com"], // your existing Google profile images domain
+    domains: [
+      "lh3.googleusercontent.com",
+      "kids-bags.s3.eu-north-1.amazonaws.com",
+    ],
   },
 
   // Optional but recommended safety net (especially if you see webpack-related warnings)

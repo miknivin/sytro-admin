@@ -70,7 +70,17 @@ export const userApi = createApi({
       },
     }),
     getAdminUsers: builder.query({
-      query: () => `/users/getAllUsers`,
+      query: ({ role, page, limit, search } = {}) => {
+        const params = new URLSearchParams();
+
+        if (role) params.set("role", role);
+        if (page) params.set("page", String(page));
+        if (limit) params.set("limit", String(limit));
+        if (search) params.set("search", search);
+
+        const queryString = params.toString();
+        return `/users/getAllUsers${queryString ? `?${queryString}` : ""}`;
+      },
       providesTags: ["AdminUsers"],
     }),
     getUserDetails: builder.query({
@@ -96,6 +106,16 @@ export const userApi = createApi({
       },
       invalidatesTags: ["AdminUsers"],
     }),
+    createVendor: builder.mutation({
+      query(body) {
+        return {
+          url: "/users/create-vendor",
+          method: "POST",
+          body,
+        };
+      },
+      invalidatesTags: ["AdminUsers"],
+    }),
   }),
 });
 
@@ -110,4 +130,5 @@ export const {
   useGetUserDetailsQuery,
   useUpdateUserMutation,
   useDeleteUserMutation,
+  useCreateVendorMutation,
 } = userApi;

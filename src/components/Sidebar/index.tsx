@@ -98,6 +98,29 @@ const menuGroups = [
         route: "/users",
       },
 
+      {
+        icon: (
+          <svg
+            className=""
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.4"
+              d="M6 12c.263 0 .524-.06.767-.175a2 2 0 0 0 .65-.491c.186-.21.333-.46.433-.734.1-.274.15-.568.15-.864a2.4 2.4 0 0 0 .586 1.591c.375.422.884.659 1.414.659.53 0 1.04-.237 1.414-.659A2.4 2.4 0 0 0 12 9.736a2.4 2.4 0 0 0 .586 1.591c.375.422.884.659 1.414.659.53 0 1.04-.237 1.414-.659A2.4 2.4 0 0 0 16 9.736c0 .295.052.588.152.861s.248.521.434.73a2 2 0 0 0 .649.488 1.809 1.809 0 0 0 1.53 0 2.03 2.03 0 0 0 .65-.488c.185-.209.332-.457.433-.73.1-.273.152-.566.152-.861 0-.974-1.108-3.85-1.618-5.121A.983.983 0 0 0 17.466 4H6.456a.986.986 0 0 0-.93.645C5.045 5.962 4 8.905 4 9.736c.023.59.241 1.148.611 1.567.37.418.865.667 1.389.697Zm0 0c.328 0 .651-.091.94-.266A2.1 2.1 0 0 0 7.66 11h.681a2.1 2.1 0 0 0 .718.734c.29.175.613.266.942.266.328 0 .651-.091.94-.266.29-.174.537-.427.719-.734h.681a2.1 2.1 0 0 0 .719.734c.289.175.612.266.94.266.329 0 .652-.091.942-.266.29-.174.536-.427.718-.734h.681c.183.307.43.56.719.734.29.174.613.266.941.266a1.819 1.819 0 0 0 1.06-.351M6 12a1.766 1.766 0 0 1-1.163-.476M5 12v7a1 1 0 0 0 1 1h2v-5h3v5h7a1 1 0 0 0 1-1v-7m-5 3v2h2v-2h-2Z"
+            />
+          </svg>
+        ),
+        label: "Vendors",
+        route: "/vendors",
+      },
 
       {
         icon: (
@@ -197,33 +220,33 @@ const menuGroups = [
         label: "Enquiries",
         route: "/enquiries",
       },
-       {
-  icon: (
-    <svg
-      className="fill-current"
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M15.75 3.75H2.25C1.83579 3.75 1.5 4.08579 1.5 4.5V6C1.5 6.41421 1.83579 6.75 2.25 6.75C3.07843 6.75 3.75 7.42157 3.75 8.25C3.75 9.07843 3.07843 9.75 2.25 9.75C1.83579 9.75 1.5 10.0858 1.5 10.5V12C1.5 12.4142 1.83579 12.75 2.25 12.75H15.75C16.1642 12.75 16.5 12.4142 16.5 12V10.5C16.5 10.0858 16.1642 9.75 15.75 9.75C14.9216 9.75 14.25 9.07843 14.25 8.25C14.25 7.42157 14.9216 6.75 15.75 6.75C16.1642 6.75 16.5 6.41421 16.5 6V4.5C16.5 4.08579 16.1642 3.75 15.75 3.75Z"
-        fill=""
-      />
-      <path
-        d="M6 8.25L8.25 10.5L12 6.75"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-    </svg>
-  ),
-  label: "Coupons",
-  route: "/coupons",
-},
+      {
+        icon: (
+          <svg
+            className="fill-current"
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M15.75 3.75H2.25C1.83579 3.75 1.5 4.08579 1.5 4.5V6C1.5 6.41421 1.83579 6.75 2.25 6.75C3.07843 6.75 3.75 7.42157 3.75 8.25C3.75 9.07843 3.07843 9.75 2.25 9.75C1.83579 9.75 1.5 10.0858 1.5 10.5V12C1.5 12.4142 1.83579 12.75 2.25 12.75H15.75C16.1642 12.75 16.5 12.4142 16.5 12V10.5C16.5 10.0858 16.1642 9.75 15.75 9.75C14.9216 9.75 14.25 9.07843 14.25 8.25C14.25 7.42157 14.9216 6.75 15.75 6.75C16.1642 6.75 16.5 6.41421 16.5 6V4.5C16.5 4.08579 16.1642 3.75 15.75 3.75Z"
+              fill=""
+            />
+            <path
+              d="M6 8.25L8.25 10.5L12 6.75"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </svg>
+        ),
+        label: "Coupons",
+        route: "/coupons",
+      },
       // {
       //   icon: (
       //     <svg
@@ -423,8 +446,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
-        className={`fixed left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         {/* <!-- SIDEBAR HEADER --> */}
         <div className="flex items-center justify-between gap-2 px-6 pb-3 pt-4 ">

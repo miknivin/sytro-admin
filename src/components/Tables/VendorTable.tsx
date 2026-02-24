@@ -9,36 +9,35 @@ import EditIcon from "../SvgIcons/EditIcon";
 import DeleteIcon from "../SvgIcons/DeleteIcon";
 import { useState, useEffect } from "react";
 import UserEditModal from "../Modals/UserEditModal";
+import AddVendorModal from "../Modals/AddVendorModal";
 import PaginationComponent from "@/utlis/pagination/PaginationComponent";
 import ReusableAlert from "@/utlis/alerts/ReusableAlert";
 import GraySpinner from "../common/GraySpinner";
-import { useSelector } from "react-redux";
 import SearchInput from "@/utlis/search/SearchInput";
 
-const UserTable = () => {
+const VendorTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const { data, isLoading, isFetching, isError } = useGetAdminUsersQuery({
+    role: "vendor",
     page: currentPage,
     limit: itemsPerPage,
     search: searchQuery,
   });
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [toBeDeletedUser, setToBeDeletedUser] = useState<User | null>(null);
-  const loginedUser = useSelector((state: any) => state.auth.user);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setCurrentPage(1);
   };
 
-  const filteredUsers = (data?.users || []).filter(
-    (user: User) => user._id !== loginedUser?._id,
-  );
+  const filteredUsers = data?.users || [];
 
   const totalPages = data?.pagination?.totalPages || 1;
 
@@ -74,7 +73,7 @@ const UserTable = () => {
       await deleteUser(toBeDeletedUser._id).unwrap();
       closeDeleteModal();
     } catch (error) {
-      console.error("Failed to delete user:", error);
+      console.error("Failed to delete vendor:", error);
     }
   };
 
@@ -87,24 +86,25 @@ const UserTable = () => {
     setCurrentPage(1);
   };
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return <Spinner />;
   }
 
   if (isError) {
-    return <p className="text-center text-danger">Failed to load users.</p>;
+    return <p className="text-center text-danger">Failed to load vendors.</p>;
   }
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark  xl:pb-1">
+    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       {isEditModalOpen && currentUserId && (
         <UserEditModal onClose={closeEditModal} userId={currentUserId} />
       )}
+      {isAddModalOpen && <AddVendorModal onClose={() => setIsAddModalOpen(false)} />}
 
       {isDeleteModalOpen && toBeDeletedUser && (
         <ReusableAlert
           title="Confirm Deletion"
-          content={`Are you sure you want to delete this user - ${toBeDeletedUser.name}?`}
+          content={`Are you sure you want to delete this vendor - ${toBeDeletedUser.name}?`}
           func={handleDelete}
           isOpen={isDeleteModalOpen}
           functionTitle="Delete"
@@ -113,10 +113,17 @@ const UserTable = () => {
         />
       )}
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark xl:pb-1">
-        <div className="gap-4">
+        <div className="flex justify-between gap-4 py-4">
           <h4 className="mb-2 text-xl font-semibold text-black dark:text-white">
-            Users
+            Vendors
           </h4>
+          <button
+            type="button"
+            onClick={() => setIsAddModalOpen(true)}
+            className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-white hover:bg-opacity-90 disabled:opacity-70"
+          >
+            Add Vendor
+          </button>
         </div>
       </div>
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -140,31 +147,25 @@ const UserTable = () => {
       </div>
 
       <div className="max-w-full overflow-x-auto">
-        {isFetching && (
-          <div className="flex items-center justify-center py-3">
-            {" "}
-            <GraySpinner />
-          </div>
-        )}
         <table className="w-full table-auto">
           <thead>
             <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              <th className=" px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
+              <th className="px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                 Name
               </th>
               <th
                 style={{ paddingLeft: "11px" }}
-                className=" px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
+                className="px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
               >
                 Created At
               </th>
               <th className=" px-4 py-4 font-medium text-black dark:text-white">
                 Email
               </th>
-              <th className=" px-4 py-4 font-medium text-black dark:text-white">
+              <th className="px-4 py-4 font-medium text-black dark:text-white">
                 Phone
               </th>
-              <th className=" px-4 py-4 font-medium text-black dark:text-white">
+              <th className="px-4 py-4 font-medium text-black dark:text-white">
                 Role
               </th>
               <th className=" px-4 py-4 font-medium text-black dark:text-white">
@@ -231,7 +232,9 @@ const UserTable = () => {
         {(!filteredUsers || filteredUsers.length === 0) && (
           <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
             <p className="text-center text-gray-500 dark:text-gray-400">
-              {searchQuery ? "No users match your search." : "No users found."}
+              {searchQuery
+                ? "No vendors match your search."
+                : "No vendors found."}
             </p>
           </div>
         )}
@@ -246,4 +249,4 @@ const UserTable = () => {
   );
 };
 
-export default UserTable;
+export default VendorTable;

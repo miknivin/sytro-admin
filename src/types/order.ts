@@ -46,7 +46,7 @@ export interface Order {
 
   orderItems: OrderItem[];
 
-  paymentMethod: "COD" | "Online" | "Partial-COD";
+  paymentMethod: "COD" | "Online" | "Partial-COD" | "Vendor-Payment";
 
   advancePaidAt?: Date | null;
 

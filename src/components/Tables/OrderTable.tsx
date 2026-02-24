@@ -8,7 +8,7 @@ import {
 } from "@/redux/api/orderApi";
 import { Order } from "@/types/order";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Parser } from "json2csv";
 import PaginationComponent from "@/utlis/pagination/PaginationComponent";
 import PreviewIcon from "../SvgIcons/PreviewIcon";
@@ -22,16 +22,34 @@ import { Tooltip } from "@mui/material";
 import Spinner from "../common/Spinner"; // for better loading states
 import SyncIcon from "../SvgIcons/SyncIcons";
 import InvoiceIcon from "../SvgIcons/InvoiceIcon";
+import GraySpinner from "../common/GraySpinner";
+
+const PAYMENT_METHOD_OPTIONS = [
+  { label: "Partial-cod", value: "Partial-COD" },
+  { label: "COD", value: "COD" },
+  { label: "Online", value: "Online" },
+  { label: "Vendor", value: "Vendor-Payment" },
+];
+
 // Define all hooks at the top
 const OrderTable = () => {
-  const { data, isLoading, isError } = useGetAdminOrdersQuery(null);
-  const [deleteOrder, { isLoading: isDeleting }] = useDeleteOrderMutation();
-  const [isDownloading, setIsDownloading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(8);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isPaymentFilterOpen, setIsPaymentFilterOpen] = useState(false);
+  const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<
+    string[]
+  >(["Partial-COD", "COD", "Online"]);
+  const { data, isLoading, isFetching, isError } = useGetAdminOrdersQuery({
+    page: currentPage,
+    limit: itemsPerPage,
+    search: searchQuery,
+    paymentMethods: selectedPaymentMethods,
+  });
+  const [deleteOrder, { isLoading: isDeleting }] = useDeleteOrderMutation();
+  const [isDownloading, setIsDownloading] = useState(false);
   const [syncDelhiveryOrders, { isLoading: isSyncing }] =
     useSyncDelhiveryOrdersMutation();
 
@@ -42,26 +60,16 @@ const OrderTable = () => {
     setCurrentPage(1);
   };
 
-  const filteredOrders = useMemo(() => {
-    if (!data?.orders || !searchQuery) return data?.orders || [];
-    const queryLower = searchQuery.toLowerCase();
-    return data.orders.filter((order: Order) => {
-      const orderId = order._id.toString().toLowerCase();
-      const fullName = order.shippingInfo.fullName?.toLowerCase() || "";
-      const phoneNo = order.shippingInfo.phoneNo.toLowerCase() || "";
-      return (
-        orderId.includes(queryLower) ||
-        fullName.includes(queryLower) ||
-        phoneNo.includes(queryLower)
-      );
-    });
-  }, [data?.orders, searchQuery]);
+  const filteredOrders = data?.orders || [];
 
-  // Calculate paginated data from filtered orders
-  const totalItems = filteredOrders.length;
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
+  const totalPages = data?.pagination?.totalPages || 1;
+  const paginatedOrders = filteredOrders;
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   // Handle page change
 
@@ -77,6 +85,15 @@ const OrderTable = () => {
   };
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const togglePaymentMethod = (method: string) => {
+    setCurrentPage(1);
+    setSelectedPaymentMethods((prev) =>
+      prev.includes(method)
+        ? prev.filter((item) => item !== method)
+        : [...prev, method],
+    );
   };
 
   // Export to CSV
@@ -207,8 +224,11 @@ const OrderTable = () => {
         />
         <div className="flex items-center justify-end gap-4">
           <select
-            defaultValue="8"
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
             className="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
           >
             <option disabled>Select items per page</option>
@@ -217,6 +237,34 @@ const OrderTable = () => {
             <option value="20">20</option>
             <option value="50">50</option>
           </select>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsPaymentFilterOpen((prev) => !prev)}
+              className="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+            >
+              Payment Method ({selectedPaymentMethods.length})
+            </button>
+            {isPaymentFilterOpen && (
+              <div className="absolute right-0 z-20 mt-2 w-56 rounded border border-stroke bg-white p-3 shadow-lg dark:border-strokedark dark:bg-boxdark">
+                {PAYMENT_METHOD_OPTIONS.map((option) => (
+                  <label
+                    key={option.value}
+                    className="mb-2 flex cursor-pointer items-center gap-2 last:mb-0"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedPaymentMethods.includes(option.value)}
+                      onChange={() => togglePaymentMethod(option.value)}
+                    />
+                    <span className="text-sm text-black dark:text-white">
+                      {option.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Export CSV Button */}
           <Tooltip title="Export as CSV" arrow>
@@ -243,6 +291,11 @@ const OrderTable = () => {
       </div>
 
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+        {isFetching && (
+          <div className="flex items-center justify-center">
+            <GraySpinner />
+          </div>
+        )}
         <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400 rtl:text-right">
           <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
             <tr>
@@ -342,7 +395,7 @@ const OrderTable = () => {
 
       <PaginationComponent
         currentPage={currentPage}
-        totalPages={Math.ceil(totalItems / itemsPerPage)}
+        totalPages={totalPages}
         onPageChange={handlePageChange}
       />
 

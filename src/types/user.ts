@@ -10,10 +10,11 @@ export interface User {
     public_id?: string;
     url?: string;
   };
-  role?: "user" | "admin"; // Add more roles if needed
+  role?: "user" | "admin" | "vendor"; // Add more roles if needed
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
   signupMethod?: "OTP" | "Email/Password" | "OAuth";
   createdAt: Date;
   updatedAt?: Date;
+  totalOrders?: number;
 }
