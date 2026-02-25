@@ -248,7 +248,7 @@ const AddVendorModal = ({ onClose }: AddVendorModalProps) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full  rounded-lg bg-blue-700 px-5 py-2.5 text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isSubmitting ? "Saving..." : "Add Vendor"}
           </button>
