@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -37,14 +38,16 @@
       margin-top: 10px;
     }
 
-    th, td {
+    th,
+    td {
       border: 1px solid #000;
       padding: 8px;
       font-size: 13px;
       text-align: right;
     }
 
-    th:first-child, td:first-child {
+    th:first-child,
+    td:first-child {
       text-align: left;
     }
 
@@ -83,133 +86,143 @@
 
 <body>
 
-<div>
-  <!-- HEADER -->
-  <div class="header">
-    <img src="https://www.sytrobags.com/images/logo/logo@2x.png" alt="Sytro Bags Logo" />
-    <h1>INVOICE</h1>
-  </div>
-
-  <!-- ADDRESS -->
-  <div class="invoice-details">
-    <div>
-      <b>Office Address</b><br />
-      Sytro Bags<br />
-      Panakal Tower, North Basin Road,<br />
-      Broadway, Ernakulam, Kochi – 682031<br />
-      <b>GST:</b> 32AZDPN8562G1ZA
+  <div>
+    <!-- HEADER -->
+    <div class="header">
+      <img src="https://www.sytrobags.com/images/logo/logo@2x.png" alt="Sytro Bags Logo" />
+      <h1>INVOICE</h1>
     </div>
 
-    <div>
-      <b>To</b><br />
-      <%= order.shippingInfo.fullName %><br />
-      <%= order.shippingInfo.address %>, <%= order.shippingInfo.city %><br />
-      <%= order.shippingInfo.state %> - <%= order.shippingInfo.zipCode %><br />
-      <%= order.shippingInfo.country %><br /><br />
-      <b>Date:</b> <%= new Date(order.createdAt).toLocaleDateString() %><br />
-      <b>Invoice #</b> <%= order._id.toString().slice(-6) %>
+    <!-- ADDRESS -->
+    <div class="invoice-details">
+      <div>
+        <b>Office Address</b><br />
+        Hifi Bags<br />
+        Panakal Tower, North Basin Road,<br />
+        Broadway, Ernakulam, Kochi – 682031<br />
+        <b>GST:</b> 32AZDPN8562G1ZA
+      </div>
+
+      <div>
+        <b>To</b><br />
+        <%= order.shippingInfo.fullName %><br />
+          <%= order.shippingInfo.address %>, <%= order.shippingInfo.city %><br />
+              <%= order.shippingInfo.state %> - <%= order.shippingInfo.zipCode %><br />
+                  <%= order.shippingInfo.country %><br /><br />
+                    <b>Date:</b>
+                    <%= new Date(order.createdAt).toLocaleDateString() %><br />
+                      <b>Invoice #</b>
+                      <%= order._id.toString().slice(-6) %>
+      </div>
     </div>
-  </div>
 
-  <!-- ITEMS TABLE -->
-  <table>
-    <tr>
-      <th>Item</th>
-      <th>Unit Price</th>
-      <th>Qty</th>
-      <th>Taxable</th>
-      <th>GST (18%)</th>
-      <th>Total</th>
-    </tr>
+    <!-- ITEMS TABLE -->
+    <table>
+      <tr>
+        <th>Item</th>
+        <th>Unit Price</th>
+        <th>Qty</th>
+        <th>Taxable</th>
+        <th>GST (18%)</th>
+        <th>Total</th>
+      </tr>
 
-    <%
-      let taxableTotal = 0;
-      let gstTotal = 0;
-
-      order.orderItems.forEach(item => {
+      <% let taxableTotal=0; let gstTotal=0; order.orderItems.forEach(item=> {
         const lineTotal = Number(item.price) * item.quantity;
         const taxable = lineTotal / 1.18;
         const gst = lineTotal - taxable;
         taxableTotal += taxable;
         gstTotal += gst;
-    %>
+        %>
 
-    <tr>
-      <td><b><%= item.name %></b></td>
-      <td>₹<%= Number(item.price).toFixed(2) %></td>
-      <td><%= item.quantity %></td>
-      <td>₹<%= taxable.toFixed(2) %></td>
-      <td>₹<%= gst.toFixed(2) %></td>
-      <td>₹<%= lineTotal.toFixed(2) %></td>
-    </tr>
+        <tr>
+          <td><b>
+              <%= item.name %>
+            </b></td>
+          <td>₹<%= Number(item.price).toFixed(2) %>
+          </td>
+          <td>
+            <%= item.quantity %>
+          </td>
+          <td>₹<%= taxable.toFixed(2) %>
+          </td>
+          <td>₹<%= gst.toFixed(2) %>
+          </td>
+          <td>₹<%= lineTotal.toFixed(2) %>
+          </td>
+        </tr>
 
-    <% }) %>
+        <% }) %>
 
-    <tr>
-      <td colspan="5" class="total">Subtotal (Incl. GST)</td>
-      <td class="total">₹<%= order.itemsPrice.toFixed(2) %></td>
-    </tr>
+          <tr>
+            <td colspan="5" class="total">Subtotal (Incl. GST)</td>
+            <td class="total">₹<%= order.itemsPrice.toFixed(2) %>
+            </td>
+          </tr>
 
-   <!-- Shipping or COD Charge fallback -->
-<% 
-  let displayShipping = 0;
-  let displayLabel = "Shipping";
+          <!-- Shipping or COD Charge fallback -->
+          <% let displayShipping=0; let displayLabel="Shipping" ; if (order.shippingAmount> 0) {
+            displayShipping = order.shippingAmount;
+            } else if (
+            (order.shippingAmount === 0 || order.shippingAmount == null) &&
+            order.codChargeCollected > 0
+            ) {
+            displayShipping = order.codChargeCollected;
+            displayLabel = "COD Charge";
+            }
+            %>
 
-  if (order.shippingAmount > 0) {
-    displayShipping = order.shippingAmount;
-  } else if (
-    (order.shippingAmount === 0 || order.shippingAmount == null) && 
-    order.codChargeCollected > 0
-  ) {
-    displayShipping = order.codChargeCollected;
-    displayLabel = "COD Charge";
-  }
-%>
+            <% if (displayShipping> 0) { %>
+              <tr>
+                <td colspan="5" class="total">
+                  <%= displayLabel %>
+                </td>
+                <td class="total">₹<%= displayShipping.toFixed(2) %>
+                </td>
+              </tr>
+              <% } %>
 
-<% if (displayShipping > 0) { %>
-  <tr>
-    <td colspan="5" class="total"><%= displayLabel %></td>
-    <td class="total">₹<%= displayShipping.toFixed(2) %></td>
-  </tr>
-<% } %>
+                <% if (order.discountAmount> 0) { %>
+                  <tr>
+                    <td colspan="5" class="total">Discount</td>
+                    <td>- ₹<%= order.discountAmount.toFixed(2) %>
+                    </td>
+                  </tr>
+                  <% } %>
 
-    <% if (order.discountAmount > 0) { %>
-    <tr>
-      <td colspan="5" class="total">Discount</td>
-      <td>- ₹<%= order.discountAmount.toFixed(2) %></td>
-    </tr>
-    <% } %>
+                    <tr>
+                      <td colspan="5" class="total">Grand Total</td>
+                      <td class="total">₹<%= order.totalAmount.toFixed(2) %>
+                      </td>
+                    </tr>
+    </table>
 
-    <tr>
-      <td colspan="5" class="total">Grand Total</td>
-      <td class="total">₹<%= order.totalAmount.toFixed(2) %></td>
-    </tr>
-  </table>
+    <!-- PAYMENT BREAKDOWN -->
+    <div class="payment-box">
+      <div class="highlight">Payment Mode: <%= order.paymentMethod %>
+      </div>
+      <br />
 
-  <!-- PAYMENT BREAKDOWN -->
-  <div class="payment-box">
-    <div class="highlight">Payment Mode: <%= order.paymentMethod %></div>
-    <br />
+      <% if (order.paymentMethod==="Partial-COD" ) { %>
+        Advance Paid (Online): ₹<%= order.advancePaid.toFixed(2) %><br />
+          Balance Payable on Delivery: <b>₹<%= order.codAmount.toFixed(2) %></b><br /><br />
+          <b>Courier must collect ₹<%= order.codAmount.toFixed(2) %> at delivery.</b>
+          <% } else if (order.paymentMethod==="COD" ) { %>
+            Amount to Collect on Delivery: <b>₹<%= order.totalAmount.toFixed(2) %></b>
+            <% } else { %>
+              Payment Completed Online
+              <% } %>
+    </div>
 
-    <% if (order.paymentMethod === "Partial-COD") { %>
-      Advance Paid (Online): ₹<%= order.advancePaid.toFixed(2) %><br />
-      Balance Payable on Delivery: <b>₹<%= order.codAmount.toFixed(2) %></b><br /><br />
-       <b>Courier must collect ₹<%= order.codAmount.toFixed(2) %> at delivery.</b>
-    <% } else if (order.paymentMethod === "COD") { %>
-      Amount to Collect on Delivery: <b>₹<%= order.totalAmount.toFixed(2) %></b>
-    <% } else { %>
-      Payment Completed Online
-    <% } %>
+    <!-- FOOTER -->
+    <div class="footer">
+      <p>Thank you for shopping with Sytro Bags</p>
+      <p> +91 8921570685 | support@sytrobags.com</p>
+      <p>This is a system-generated invoice</p>
+    </div>
+
   </div>
-
-  <!-- FOOTER -->
-  <div class="footer">
-    <p>Thank you for shopping with Sytro Bags</p>
-    <p> +91 8921570685 | support@sytrobags.com</p>
-    <p>This is a system-generated invoice</p>
-  </div>
-
-</div>
 
 </body>
+
 </html>
