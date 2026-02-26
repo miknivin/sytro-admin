@@ -8,19 +8,14 @@ const API_TOKEN = process.env.GSHEET_API_TOKEN || "your-static-token-here";
 // Middleware to verify token
 async function verifyToken(req) {
   try {
-    // Extract token from Authorization header
     const authHeader = req.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return { success: false, message: "No token provided or invalid format" };
     }
-
     const token = authHeader.replace("Bearer ", "");
-
-    // Compare token with server-side token
     if (token !== API_TOKEN) {
       return { success: false, message: "Invalid token" };
     }
-
     return { success: true };
   } catch (error) {
     return {
@@ -34,7 +29,7 @@ export async function GET(req) {
   try {
     await dbConnect();
 
-    // Verify token
+    // Verify token (required for Google Sheets webhook)
     const authResult = await verifyToken(req);
     if (!authResult.success) {
       return NextResponse.json(
@@ -43,24 +38,37 @@ export async function GET(req) {
       );
     }
 
-    // Fetch all orders sorted by latest first
-    const orders = await Order.find().sort({ createdAt: -1 });
+    // Fetch orders + populate user (only select the name field)
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "user",
+        select: "name", // We only need the name (vendor name)
+      })
+      .lean(); // Faster + plain objects
 
-    if (!orders) {
-      return NextResponse.json(
-        { success: false, message: "No orders found" },
-        { status: 404 },
-      );
-    }
-
-    if (orders.length === 0) {
+    if (!orders || orders.length === 0) {
       return NextResponse.json({ success: true, orders: [] }, { status: 200 });
     }
 
-    return NextResponse.json({ success: true, orders }, { status: 200 });
-  } catch (error) {
+    // Add a clean vendorName field using user.name
+    const enrichedOrders = orders.map((order) => {
+      const user = order.user || {}; // fallback if populate fails for some reason
+
+      return {
+        ...order, // keep all original order fields
+        vendorName: user.name || "Unknown Vendor", // ← this is the vendor name
+      };
+    });
+
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: true, orders: enrichedOrders },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("Orders fetch error:", error);
+    return NextResponse.json(
+      { success: false, message: error.message || "Server error" },
       { status: 500 },
     );
   }
