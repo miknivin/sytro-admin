@@ -42,6 +42,7 @@ export const orderApi = createApi({
         if (queryParams.limit)
           searchParams.set("limit", String(queryParams.limit));
         if (queryParams.search) searchParams.set("search", queryParams.search);
+        if (queryParams.userId) searchParams.set("userId", queryParams.userId);
         if (Array.isArray(queryParams.paymentMethods)) {
           searchParams.set(
             "paymentMethods",

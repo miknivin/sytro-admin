@@ -4,7 +4,9 @@ import {
   useGetAdminUsersQuery,
   useDeleteUserMutation,
 } from "@/redux/api/userApi";
+import Link from "next/link";
 import { User } from "@/types/user";
+import PreviewIcon from "../SvgIcons/PreviewIcon";
 import EditIcon from "../SvgIcons/EditIcon";
 import DeleteIcon from "../SvgIcons/DeleteIcon";
 import { useState, useEffect } from "react";
@@ -211,6 +213,12 @@ const VendorTable = () => {
                 </td>
 
                 <td className="flex gap-5 px-4 py-5">
+                  <Link
+                    href={`/vendors/${user._id}`}
+                    className="btn border-none bg-gray-700 p-3 hover:bg-gray-700/80"
+                  >
+                    <PreviewIcon />
+                  </Link>
                   <button
                     onClick={() => openEditModal(user._id?.toString() || "")}
                     className="btn border-none bg-primary p-3 hover:bg-primary/80"

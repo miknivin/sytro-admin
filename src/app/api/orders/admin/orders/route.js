@@ -13,7 +13,6 @@ export async function GET(req) {
   try {
     await dbConnect();
 
-    // Authenticate the user
     const user = await isAuthenticatedUser(req);
     if (!user) {
       return NextResponse.json(
@@ -21,30 +20,34 @@ export async function GET(req) {
         { status: 401 },
       );
     }
-
     authorizeRoles(user, "admin");
 
     const { searchParams } = new URL(req.url);
     const search = (searchParams.get("search") || "").trim();
     const paymentMethodsParam = searchParams.get("paymentMethods");
-    const paymentMethods = paymentMethodsParam
-      ? paymentMethodsParam
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean)
-      : [];
-
+    const userId = searchParams.get("userId")?.trim(); // ← NEW
     const page = Math.max(Number(searchParams.get("page")) || 1, 1);
     const limit = Math.max(Number(searchParams.get("limit")) || 8, 1);
 
     const query = {};
 
-    if (paymentMethods.length > 0) {
-      query.paymentMethod = { $in: paymentMethods };
+    // ── NEW: Filter by specific user ────────────────
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      query.user = new mongoose.Types.ObjectId(userId);
+    }
+    // ────────────────────────────────────────────────
+
+    if (paymentMethodsParam) {
+      const paymentMethods = paymentMethodsParam
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      if (paymentMethods.length > 0) {
+        query.paymentMethod = { $in: paymentMethods };
+      }
     }
 
     if (search) {
-      // Escape special characters so + - * ? etc don't break the regex
       const escaped = escapeRegex(search);
       const regex = new RegExp(escaped, "i");
 
@@ -56,18 +59,15 @@ export async function GET(req) {
           $expr: {
             $regexMatch: {
               input: { $toString: "$_id" },
-              regex: escaped, // important: also escape for $expr
+              regex: escaped,
               options: "i",
             },
           },
         },
       ];
 
-      // If it's a valid ObjectId, also allow exact match on _id
       if (mongoose.Types.ObjectId.isValid(search)) {
-        searchConditions.push({
-          _id: new mongoose.Types.ObjectId(search),
-        });
+        searchConditions.push({ _id: new mongoose.Types.ObjectId(search) });
       }
 
       query.$or = searchConditions;
@@ -82,7 +82,7 @@ export async function GET(req) {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean(); // ← optional: faster if you don't need Mongoose documents
+      .lean();
 
     return NextResponse.json(
       {
