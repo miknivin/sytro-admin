@@ -21,7 +21,7 @@ export async function POST(req) {
     // ── Security ────────────────────────────────────────
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.split(" ")?.[1];
-    const expectedToken = process.env.GSHEET_EXPECTED_TOKEN;
+    const expectedToken = process.env.GSHEET_API_TOKEN;
 
     if (!token || token !== expectedToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
