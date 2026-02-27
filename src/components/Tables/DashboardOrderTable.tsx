@@ -4,13 +4,24 @@ import { useGetAdminOrdersQuery } from "@/redux/api/orderApi";
 import { Order } from "@/types/order";
 import Link from "next/link";
 import Spinner from "../common/Spinner";
+import { useState } from "react";
 
 type OrderTableProps = {
   limit: number | null;
 };
 
 const DashboardOrderTable = ({ limit }: OrderTableProps) => {
-  const { data, isLoading, isError } = useGetAdminOrdersQuery(null);
+  const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<
+    string[]
+  >(["Partial-COD", "COD", "Online"]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const { data, isLoading, isError } = useGetAdminOrdersQuery({
+    page: currentPage,
+    limit: itemsPerPage,
+
+    paymentMethods: selectedPaymentMethods,
+  });
 
   if (isLoading) {
     return (
