@@ -5,7 +5,9 @@ import mongoose from "mongoose";
 import { isAuthenticatedUser, authorizeRoles } from "@/middlewares/auth";
 import dbConnect from "@/lib/db/connection";
 import Order from "@/models/Order";
+import Product from "@/models/Products";
 import { createDelhiveryShipment } from "@/utlis/createDelhiveryShipment";
+import { getShipmentDimensionsFromOrderItems } from "@/utlis/shippingDimensions";
 
 const DELHIVERY_API_TOKEN = process.env.DELHIVERY_API_TOKEN;
 
@@ -55,6 +57,26 @@ export async function POST(
     );
     const weightInGrams = totalQuantity * 300;
 
+    const productIds = Array.from(
+      new Set(
+        order.orderItems
+          .map((item: any) => item.product)
+          .filter(Boolean)
+          .map((id: any) => id.toString()),
+      ),
+    );
+    const products = await Product.find({ _id: { $in: productIds } })
+      .select("dimentions specifications")
+      .lean();
+    const productsById = products.reduce((acc: Record<string, any>, product: any) => {
+      acc[product._id.toString()] = product;
+      return acc;
+    }, {});
+    const shipmentDimensions = getShipmentDimensionsFromOrderItems(
+      order.orderItems,
+      productsById,
+    );
+
     // NEW Hifi bags address + HSN 4202 for bags/backpacks
     const shipmentData = {
       shipments: [
@@ -92,9 +114,9 @@ export async function POST(
           seller_inv: `INV${order._id.toString()}`,
 
           quantity: totalQuantity.toString(),
-          shipment_width: "30",
-          shipment_height: "40",
-          shipment_length: "15",
+          shipment_width: shipmentDimensions.width.toString(),
+          shipment_height: shipmentDimensions.height.toString(),
+          shipment_length: shipmentDimensions.length.toString(),
           weight: weightInGrams.toString(),
           shipping_mode: "Surface",
           address_type: "home",

@@ -24,6 +24,12 @@ export interface Product {
     color?: string;
     weight?: number;
   };
+  dimentions?: {
+    length?: number;
+    width?: number;
+    height?: number;
+    unit?: "cm" | "inches";
+  };
   offerEndTime?: any;
   capacity: number;
   size: "Small" | "Medium" | "Large";

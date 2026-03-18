@@ -100,7 +100,9 @@ const DashboardOrderTable = ({ limit }: OrderTableProps) => {
                   {order.shippingInfo.fullName}
                 </td>
                 <td className="px-6 py-4 text-center">₹{order.totalAmount}</td>
-                <td className="px-6 py-4 text-center">{order.orderStatus}</td>
+                <td className="px-6 py-4 text-center">
+                  {order.delhiveryCurrentStatus || order.orderStatus}
+                </td>
                 <td className="px-6 py-4 text-center">
                   {new Date(order.createdAt).toLocaleDateString("en-GB", {
                     day: "2-digit",

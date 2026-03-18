@@ -19,7 +19,13 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
 }) => {
   const [productState, setProductState] = useState<Product>({
     ...productProp,
-    youtubeUrl: Array.isArray(productProp.youtubeUrl) ? productProp.youtubeUrl : productProp.youtubeUrl ? [productProp.youtubeUrl as any] : []
+    youtubeUrl: Array.isArray(productProp.youtubeUrl) ? productProp.youtubeUrl : productProp.youtubeUrl ? [productProp.youtubeUrl as any] : [],
+    dimentions: productProp.dimentions || {
+      length: undefined,
+      width: undefined,
+      height: undefined,
+      unit: "cm",
+    },
   });
 
   const handleChange = (
@@ -41,6 +47,31 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
       category: value,
     };
 
+    setProductState(updatedProduct);
+    updateProduct(updatedProduct);
+  };
+
+  const handleDimentionsChange = (field: "length" | "width" | "height", value: string) => {
+    const numericValue = value === "" ? undefined : Number(value);
+    const updatedProduct = {
+      ...productState,
+      dimentions: {
+        ...productState.dimentions,
+        [field]: numericValue,
+      },
+    };
+    setProductState(updatedProduct);
+    updateProduct(updatedProduct);
+  };
+
+  const handleDimentionsUnitChange = (value: "cm" | "inches") => {
+    const updatedProduct = {
+      ...productState,
+      dimentions: {
+        ...productState.dimentions,
+        unit: value,
+      },
+    };
     setProductState(updatedProduct);
     updateProduct(updatedProduct);
   };
@@ -154,6 +185,64 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({
                 placeholder="Enter capacity"
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               />
+            </div>
+          </div>
+          <div className="mb-4.5">
+            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+              Shipping Dimensions
+            </label>
+            <div className="flex flex-col gap-6 xl:flex-row">
+              <div className="w-full xl:w-1/4">
+                <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                  Length
+                </label>
+                <input
+                  type="number"
+                  value={productState.dimentions?.length ?? ""}
+                  onChange={(e) => handleDimentionsChange("length", e.target.value)}
+                  placeholder="Length"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                />
+              </div>
+              <div className="w-full xl:w-1/4">
+                <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                  Width
+                </label>
+                <input
+                  type="number"
+                  value={productState.dimentions?.width ?? ""}
+                  onChange={(e) => handleDimentionsChange("width", e.target.value)}
+                  placeholder="Width"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                />
+              </div>
+              <div className="w-full xl:w-1/4">
+                <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                  Height
+                </label>
+                <input
+                  type="number"
+                  value={productState.dimentions?.height ?? ""}
+                  onChange={(e) => handleDimentionsChange("height", e.target.value)}
+                  placeholder="Height"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                />
+              </div>
+              <div className="w-full xl:w-1/4">
+                <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                  Unit
+                </label>
+                <select
+                  className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  value={productState.dimentions?.unit || "cm"}
+                  onChange={(e) =>
+                    handleDimentionsUnitChange(e.target.value as "cm" | "inches")
+                  }
+                >
+                  <option value="cm">cm</option>
+                  <option value="inches">inches</option>
+                </select>
+              </div>
             </div>
           </div>
           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">

@@ -15,8 +15,8 @@ interface OrderHeaderProps {
   orderDate: string;
   orderStatus: string;
   orderId: string;
-  delhiveryStatus?: string;
-  delhiveryError?: boolean;
+  currentStatus: string;
+  hasSyncedDelhiveryStatus?: boolean;
   showCreateDelhiveryLink?: boolean;
   hasWaybill?: boolean;
   waybill?: string;
@@ -27,8 +27,8 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   orderDate,
   orderStatus,
   orderId,
-  delhiveryStatus,
-  delhiveryError,
+  currentStatus,
+  hasSyncedDelhiveryStatus = false,
   showCreateDelhiveryLink = false,
   hasWaybill = false,
   waybill = "",
@@ -100,12 +100,12 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
         </div>
 
         <div className="flex flex-col gap-3">
-          {/* Show live Delhivery status if available, otherwise show status dropdown */}
+          {/* Show synced DB status if present, otherwise keep the manual status dropdown */}
           <div className="flex items-center gap-2">
-            {delhiveryStatus && !delhiveryError ? (
+            {hasSyncedDelhiveryStatus ? (
               <div className="flex h-full items-center justify-center">
                 <span className="inline-block min-w-[220px] rounded-lg bg-blue-700 px-6 py-3 text-center text-base font-semibold text-white shadow-md">
-                  {delhiveryStatus}
+                  {currentStatus}
                 </span>
               </div>
             ) : (

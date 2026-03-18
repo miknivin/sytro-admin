@@ -24,6 +24,12 @@ const StepperApp = () => {
     size: "Small",
     capacity: 15,
     youtubeUrl: [],
+    dimentions: {
+      length: undefined,
+      width: undefined,
+      height: undefined,
+      unit: "cm",
+    },
   });
 
   const nextStep = () => {
@@ -69,6 +75,12 @@ const StepperApp = () => {
         size: "Small",
         capacity: 0,
         youtubeUrl: [],
+        dimentions: {
+          length: undefined,
+          width: undefined,
+          height: undefined,
+          unit: "cm",
+        },
       });
       setCurrentStep(1);
     } catch (err) {

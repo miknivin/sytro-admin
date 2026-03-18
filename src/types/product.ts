@@ -49,6 +49,7 @@ export type Product = {
   images: Image[];
   category: any;
   specifications?: Specifications;
+  dimentions?: Dimensions;
   capacity: number;
   size: "Small" | "Medium" | "Large";
   stock: number;

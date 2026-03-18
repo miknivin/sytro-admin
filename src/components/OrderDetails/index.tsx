@@ -1,68 +1,20 @@
 "use client";
-import { useEffect, useState } from "react";
 import OrderHeader from "./OrderHeader";
 import ProductItem from "./ProductItem";
 import OrderSummary from "./OrderSummary";
-import ShippingDetails from "./ShippingDetails";
 import CustomerDetails from "./CustomerDetails";
 import { useOrderDetailsQuery } from "@/redux/api/orderApi";
 import Spinner from "../common/Spinner";
-import { Order } from "@/types/order";
 import { formatDate } from "./../../utlis/formatDate";
 import Link from "next/link";
-import { trackDelhiveryShipment } from "@/utlis/trackDelhiveryShipment";
 
 interface OrderDetailsProps {
   orderId: string;
 }
 
 export default function OrderDetails({ orderId }: OrderDetailsProps) {
-  const { data, error, isLoading } = useOrderDetailsQuery(orderId);
-  const [orderDetails, setOrderDetails] = useState<Order | null>(null);
-  // Delhivery live tracking states
-  const [delhiveryStatus, setDelhiveryStatus] = useState<string>("");
-  const [delhiveryError, setDelhiveryError] = useState<boolean>(false);
-  useEffect(() => {
-    if (data) {
-      setOrderDetails(data.order);
-      //console.log("Order Details:", data);
-    }
-  }, [data]);
-
-  // useEffect(() => {
-  //   console.log("Order ID:", orderId); // Log the orderId
-  // }, [orderId]);
-
-  // Automatically fetch Delhivery tracking status when order has a waybill
-  useEffect(() => {
-    const fetchAndUpdateStatus = async () => {
-      if (!orderDetails?.waybill) {
-        setDelhiveryStatus("");
-        setDelhiveryError(true);
-        return;
-      }
-
-      try {
-        const trackResult = await trackDelhiveryShipment(orderDetails.waybill);
-        const shipmentStatus =
-          trackResult?.ShipmentData?.[0]?.Shipment?.Status?.Status;
-
-        if (shipmentStatus) {
-          setDelhiveryStatus(shipmentStatus);
-          setDelhiveryError(false);
-        } else {
-          setDelhiveryStatus("");
-          setDelhiveryError(true);
-        }
-      } catch (error) {
-        console.error("Delhivery tracking error:", error);
-        setDelhiveryStatus("");
-        setDelhiveryError(true);
-      }
-    };
-
-    fetchAndUpdateStatus();
-  }, [orderDetails]);
+  const { data, isLoading } = useOrderDetailsQuery(orderId);
+  const orderDetails = data?.order;
 
   if (isLoading) {
     return <Spinner />;
@@ -88,9 +40,11 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
         orderDate={formatDate(orderDetails.createdAt)}
         orderId={orderDetails._id.toString()}
         orderStatus={orderDetails.orderStatus}
-        delhiveryStatus={delhiveryStatus}
+        currentStatus={
+          orderDetails.delhiveryCurrentStatus || orderDetails.orderStatus
+        }
+        hasSyncedDelhiveryStatus={!!orderDetails.delhiveryCurrentStatus}
         showCreateDelhiveryLink={!orderDetails.waybill}
-        delhiveryError={delhiveryError || !orderDetails.waybill}
         hasWaybill={!!orderDetails.waybill}
         waybill={orderDetails.waybill || ""}
       />
@@ -100,7 +54,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
             <p className="text-lg font-semibold leading-6 text-gray-800 dark:text-gray-100 md:text-xl xl:leading-5">
               Customer’s Cart
             </p>
-            {orderDetails.orderItems.map((product, index) => (
+            {orderDetails.orderItems.map((product:any, index:number) => (
               <ProductItem key={index} product={product} />
             ))}
           </div>

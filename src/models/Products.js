@@ -101,6 +101,16 @@ const productSchema = new mongoose.Schema(
         type: Number,
       },
     },
+    dimentions: {
+      length: Number,
+      width: Number,
+      height: Number,
+      unit: {
+        type: String,
+        enum: ["cm", "inches"],
+        default: "cm",
+      },
+    },
     capacity: {
       type: Number,
       required: [true, "Please enter bag capacity in litres"],
