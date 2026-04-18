@@ -1,9 +1,12 @@
 import dbConnect from "@/lib/db/connection";
-import { isAuthenticatedUser } from "@/middlewares/auth";
+import { authorizeRoles, isAuthenticatedUser } from "@/middlewares/auth";
 import Order from "@/models/Order";
 import { NextResponse } from "next/server";
-import User from "@/models/User";
 import { createShiprocketOrder } from "@/lib/shipRocket/createShipRocketOrder";
+import {
+  isCashCollectionPaymentMethod,
+  normalizePaymentData,
+} from "@/lib/orders/paymentUtils";
 export async function POST(req) {
   try {
     await dbConnect();
@@ -26,7 +29,25 @@ export async function POST(req) {
       totalAmount,
       paymentMethod,
       paymentInfo,
+      advancePaid,
+      advancePaidAt,
+      remainingAmount,
+      codAmount,
+      codChargeCollected,
+      advancePayment,
     } = body;
+
+    const normalizedPayment = normalizePaymentData({
+      paymentMethod,
+      totalAmount,
+      itemsPrice,
+      advancePaid,
+      advancePaidAt,
+      remainingAmount,
+      codAmount,
+      codChargeCollected,
+      advancePayment,
+    });
 
     const order = await Order.create({
       orderItems,
@@ -34,8 +55,13 @@ export async function POST(req) {
       itemsPrice,
       taxAmount,
       shippingAmount,
-      totalAmount,
-      paymentMethod,
+      totalAmount: normalizedPayment.totalAmount,
+      paymentMethod: normalizedPayment.paymentMethod,
+      advancePaid: normalizedPayment.advancePaid,
+      advancePaidAt: normalizedPayment.advancePaidAt,
+      remainingAmount: normalizedPayment.remainingAmount,
+      codAmount: normalizedPayment.codAmount,
+      codChargeCollected: normalizedPayment.codChargeCollected,
       paymentInfo,
       user: user?._id,
     });
@@ -62,7 +88,9 @@ export async function POST(req) {
         tax_rate: 18,
       })),
       // Map your paymentMethod to Shiprocket's expected values
-      payment_method: paymentMethod === "COD" ? "COD" : "Prepaid",
+      payment_method: isCashCollectionPaymentMethod(order.paymentMethod)
+        ? "COD"
+        : "Prepaid",
       package_details: {
         dead_weight: 1.5,
         dimensions: {

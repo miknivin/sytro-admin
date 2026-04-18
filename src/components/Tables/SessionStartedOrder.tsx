@@ -3,8 +3,9 @@
 import {
   useDeleteSessionOrderByIdMutation,
   useSessionStartedOrdersQuery,
-  useSearchSessionStartedOrdersQuery, // Import the search query hook
+  useSearchSessionStartedOrdersQuery,
 } from "@/redux/api/orderApi";
+import { normalizePaymentData } from "@/lib/orders/paymentUtils";
 import { SessionStartedOrder } from "@/types/sessionStartedOrder";
 import Link from "next/link";
 import Spinner from "../common/Spinner";
@@ -17,6 +18,21 @@ import toast from "react-hot-toast";
 import ReusableAlert from "@/utlis/alerts/ReusableAlert";
 import ClickToCopy from "@/utlis/ClickToCopy/SimpleClickToCopy";
 
+const formatAmount = (amount: number) => `₹ ${amount.toFixed(2)}`;
+
+const getOrderTypeLabel = (paymentMethod?: string) => {
+  switch (paymentMethod) {
+    case "Partial-COD":
+      return "Partial-COD";
+    case "COD":
+      return "COD";
+    case "Vendor-Payment":
+      return "Vendor";
+    default:
+      return "Online";
+  }
+};
+
 const SessionStartedOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -27,16 +43,14 @@ const SessionStartedOrders = () => {
   >({});
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // Fetch all session orders when there is no search query
   const {
     data: allOrdersData,
     isLoading: isLoadingAll,
     isError: isErrorAll,
   } = useSessionStartedOrdersQuery(null, {
-    skip: !!searchQuery, // Skip this query if searchQuery is non-empty
+    skip: !!searchQuery,
   });
 
-  // Fetch searched session orders when there is a search query
   const {
     data: searchedOrdersData,
     isLoading: isLoadingSearch,
@@ -44,23 +58,22 @@ const SessionStartedOrders = () => {
   } = useSearchSessionStartedOrdersQuery(
     { keyword: searchQuery },
     {
-      skip: !searchQuery, // Skip this query if searchQuery is empty
+      skip: !searchQuery,
     },
   );
 
   const [deleteOrder, { isLoading: isDeleting }] =
     useDeleteSessionOrderByIdMutation();
 
-  // Determine which data to use based on searchQuery
   const data = searchQuery ? searchedOrdersData : allOrdersData;
   const isLoading = searchQuery ? isLoadingSearch : isLoadingAll;
   const isError = searchQuery ? isErrorSearch : isErrorAll;
 
-  // Function to remove duplicates based on user and shippingInfo
   const removeDuplicates = (
     orders: SessionStartedOrder[],
   ): SessionStartedOrder[] => {
     const seen = new Set<string>();
+
     return orders.filter((order) => {
       const key = `${order.user.toString()}-${JSON.stringify(order.shippingInfo)}`;
       if (seen.has(key)) return false;
@@ -69,18 +82,15 @@ const SessionStartedOrders = () => {
     });
   };
 
-  // Process orders (remove duplicates)
   const uniqueOrders = useMemo(
     () => (data?.data ? removeDuplicates(data.data) : []),
-    [data]
+    [data],
   );
 
-  // Update total items for pagination
   useEffect(() => {
     setTotalItems(uniqueOrders.length);
   }, [uniqueOrders]);
 
-  // Paginate the unique orders
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const paginatedOrders = uniqueOrders.slice(indexOfFirstItem, indexOfLastItem);
@@ -94,11 +104,6 @@ const SessionStartedOrders = () => {
     }
   };
 
-  const openDeleteModal = (session: SessionStartedOrder) => {
-    setCurrentSession(session);
-    setIsDeleteModalOpen(true);
-  };
-
   const closeDeleteModal = () => {
     setCurrentSession({});
     setIsDeleteModalOpen(false);
@@ -106,7 +111,7 @@ const SessionStartedOrders = () => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page on search
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
@@ -132,6 +137,7 @@ const SessionStartedOrders = () => {
           Session Started Orders
         </h4>
       </div>
+
       <div className="mb-3 flex items-center justify-between">
         <SearchInput
           placeholder="Search by name, order ID..."
@@ -150,78 +156,102 @@ const SessionStartedOrders = () => {
         </select>
       </div>
 
-      <div className="relative shadow-md sm:rounded-lg">
+      <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400 rtl:text-right">
           <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th scope="col" className="px-6 py-3">
+              <th scope="col" className="px-4 py-2.5">
                 Order ID
               </th>
-              <th scope="col" className="px-6 py-3 text-center">
+              <th scope="col" className="px-4 py-2.5 text-center">
                 Customer
               </th>
-              <th scope="col" className="px-6 py-3 text-center">
+              <th scope="col" className="px-4 py-2.5 text-center">
                 Total
               </th>
-              <th scope="col" className="px-6 py-3 text-center">
+              <th scope="col" className="px-4 py-2.5 text-center">
+                Order type
+              </th>
+              <th scope="col" className="px-4 py-2.5 text-center">
+                Remaining amount
+              </th>
+              <th scope="col" className="px-4 py-2.5 text-center">
                 Razorpay order Id
               </th>
-              <th scope="col" className="px-6 py-3 text-center">
+              <th scope="col" className="px-4 py-2.5 text-center">
                 Date
               </th>
-              <th scope="col" className="px-6 py-3 text-center">
+              <th scope="col" className="px-4 py-2.5 text-center">
                 Action
               </th>
             </tr>
           </thead>
           <tbody>
-            {paginatedOrders.map((order: SessionStartedOrder) => (
-              <tr
-                key={order._id.toString()}
-                className="border-b border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
-              >
-                <th
-                  scope="row"
-                  className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
+            {paginatedOrders.map((order: SessionStartedOrder) => {
+              const paymentData = normalizePaymentData(order);
+              const isPartialCod = paymentData.paymentMethod === "Partial-COD";
+
+              return (
+                <tr
+                  key={order._id.toString()}
+                  className="border-b border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
                 >
-                  {order._id.slice(-6)}
-                </th>
-                <td className="px-6 py-4 text-center">
-                  {order.shippingInfo?.fullName || "N/A"}
-                </td>
-                <td className="px-6 py-4 text-center">₹{order.totalAmount}</td>
-                <td className="px-6 py-4 text-center">
-                  <ClickToCopy label={""} value={order.razorpayOrderId} />
-                </td>
-                <td className="px-6 py-4 text-center">
-                  {new Date(order.createdAt).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "2-digit",
-                  })}
-                </td>
-                <td className="flex flex-wrap justify-center gap-3 border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                  <Link
-                    href={`/orders/session-started/${order._id}`}
-                    className="btn border-none bg-primary p-3 text-gray-200 hover:bg-primary/80"
+                  <th
+                    scope="row"
+                    className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-white"
                   >
-                    <PreviewIcon />
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setIsDeleteModalOpen(true);
-                      setCurrentSession(order);
-                    }}
-                    disabled={isDeleting}
-                    className="btn !border-none bg-red-600 p-3 text-gray-200 hover:bg-red-600/80"
-                  >
-                    {isDeleting ? <Spinner /> : <DeleteIcon />}
-                  </button>
-                </td>
-              </tr>
-            ))}
+                    {order._id.slice(-6)}
+                  </th>
+                  <td className="px-4 py-3 text-center">
+                    {order.shippingInfo?.fullName || "N/A"}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {formatAmount(paymentData.totalAmount)}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200">
+                      {getOrderTypeLabel(paymentData.paymentMethod)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {isPartialCod
+                      ? formatAmount(paymentData.remainingAmount)
+                      : "-"}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <ClickToCopy label="" value={order.razorpayOrderId} />
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {new Date(order.createdAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "2-digit",
+                    })}
+                  </td>
+                  <td className="flex flex-wrap justify-center gap-3 border-b border-[#eee] px-3 py-3 dark:border-strokedark">
+                    <Link
+                      href={`/orders/session-started/${order._id}`}
+                      className="btn border-none bg-primary p-3 text-gray-200 hover:bg-primary/80"
+                    >
+                      <PreviewIcon />
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setIsDeleteModalOpen(true);
+                        setCurrentSession(order);
+                      }}
+                      disabled={isDeleting}
+                      className="btn !border-none bg-red-600 p-3 text-gray-200 hover:bg-red-600/80"
+                    >
+                      {isDeleting ? <Spinner /> : <DeleteIcon />}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+
         {(!uniqueOrders || uniqueOrders.length === 0) && (
           <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
             <p className="text-center text-gray-500 dark:text-gray-400">
@@ -238,14 +268,15 @@ const SessionStartedOrders = () => {
         totalPages={Math.ceil(totalItems / itemsPerPage)}
         onPageChange={handlePageChange}
       />
+
       {isDeleteModalOpen && currentSession && (
         <ReusableAlert
           title="Confirm Deletion"
           content={`Are you sure you want to delete "${currentSession._id?.slice(-6)}"?`}
           func={handleDelete}
           isOpen={isDeleteModalOpen}
-          functionTitle={"Delete"}
-          buttonStyle={"bg-red-600"}
+          functionTitle="Delete"
+          buttonStyle="bg-red-600"
           onClose={closeDeleteModal}
         />
       )}

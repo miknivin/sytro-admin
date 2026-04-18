@@ -1,9 +1,11 @@
 import Razorpay from "razorpay";
-import User from "@/models/User";
-import Order from "@/models/Order";
 import { isAuthenticatedUser } from "@/middlewares/auth";
 import SessionStartedOrder from "@/models/SessionStartedOrders";
 import dbConnect from "@/lib/db/connection";
+import {
+  getRazorpayChargeAmount,
+  normalizePaymentData,
+} from "@/lib/orders/paymentUtils";
 
 export async function POST(req) {
   const headers = {
@@ -31,7 +33,7 @@ export async function POST(req) {
     }
 
     const { orderData } = body;
-    const { itemsPrice, shippingInfo, orderItems } = orderData;
+    const { itemsPrice, totalAmount, shippingInfo, orderItems } = orderData;
 
     if (!itemsPrice || !orderItems) {
       return new Response(JSON.stringify({ error: "Missing fields" }), {
@@ -40,13 +42,41 @@ export async function POST(req) {
       });
     }
 
+    const paymentMethod =
+      orderData?.paymentMethod === "Partial-COD" ? "Partial-COD" : "Online";
+
+    const normalizedPayment = normalizePaymentData({
+      paymentMethod,
+      totalAmount: totalAmount ?? itemsPrice,
+      itemsPrice,
+      paymentAmount: orderData?.paymentAmount,
+      advancePaidInThisSession: orderData?.advancePaidInThisSession,
+      codCharge: orderData?.codCharge,
+      advancePayment: orderData?.advancePayment,
+    });
+
+    const razorpayChargeAmount = getRazorpayChargeAmount({
+      ...normalizedPayment,
+      itemsPrice,
+    });
+
+    if (!razorpayChargeAmount) {
+      return new Response(
+        JSON.stringify({ error: "Invalid advance payment amount" }),
+        {
+          status: 400,
+          headers,
+        },
+      );
+    }
+
     const razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_SECRET_KEY,
     });
 
     const options = {
-      amount: itemsPrice * 100,
+      amount: Math.round(razorpayChargeAmount * 100),
       currency: "INR",
       receipt: `order_${Date.now()}`,
       payment_capture: 1,
@@ -57,11 +87,22 @@ export async function POST(req) {
     const newOrder = new SessionStartedOrder({
       razorpayOrderId: order.id,
       razorpayPaymentStatus: order.status,
+      paymentMethod,
+      paymentAmount: razorpayChargeAmount,
+      advancePaidInThisSession:
+        paymentMethod === "Partial-COD" ? normalizedPayment.advancePaid : 0,
+      codCharge: Number(
+        orderData?.codCharge ?? orderData?.advancePayment?.codCharge ?? 100,
+      ),
+      paymentInfo: {
+        id: order.id,
+        status: order.status,
+      },
       user: user._id,
       orderItems,
       shippingInfo,
       itemsPrice,
-      totalAmount: itemsPrice,
+      totalAmount: normalizedPayment.totalAmount,
     });
 
     await newOrder.save();

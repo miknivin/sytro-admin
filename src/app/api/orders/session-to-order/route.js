@@ -2,12 +2,20 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connection";
 import SessionStartedOrder from "@/models/SessionStartedOrders";
 import Order from "@/models/Order";
+import { normalizePaymentData } from "@/lib/orders/paymentUtils";
+
+const toAmount = (value) => {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? Math.round(amount * 100) / 100 : 0;
+};
 
 export async function POST(request) {
   try {
     await dbConnect();
 
-    const { sessionOrderId } = await request.json();
+    const body = await request.json();
+    const sessionOrderId =
+      typeof body === "string" ? body : body?.sessionOrderId;
 
     if (!sessionOrderId) {
       return NextResponse.json(
@@ -23,6 +31,73 @@ export async function POST(request) {
         { error: "Session Order not found" },
         { status: 404 },
       );
+    }
+
+    const paymentMethod =
+      body?.paymentMethod ?? sessionOrder.paymentMethod ?? "Online";
+    const sessionTotalAmount = toAmount(
+      sessionOrder.totalAmount ?? sessionOrder.itemsPrice,
+    );
+    const itemsTotalAmount = toAmount(sessionOrder.itemsPrice);
+    const sessionAdvancePaid = toAmount(
+      body?.paymentAmount ??
+        sessionOrder.paymentAmount ??
+        sessionOrder.advancePaidInThisSession,
+    );
+    const advancePaidAt = body?.advancePaidAt ?? sessionOrder.createdAt;
+
+    let normalizedPayment;
+    let orderTotalAmount = sessionTotalAmount;
+
+    if (paymentMethod === "Partial-COD") {
+      const codCharge = toAmount(
+        body?.codCharge ??
+          sessionOrder.codCharge ??
+          body?.codChargeCollected ??
+          sessionOrder.codChargeCollected,
+      );
+      const expectedPartialCodTotal = toAmount(itemsTotalAmount + codCharge);
+      const remainingAmount = toAmount(
+        Math.max(expectedPartialCodTotal - sessionAdvancePaid, 0),
+      );
+
+      normalizedPayment = normalizePaymentData({
+        paymentMethod: "Partial-COD",
+        totalAmount: expectedPartialCodTotal,
+        itemsPrice: itemsTotalAmount,
+        paymentAmount: sessionAdvancePaid,
+        advancePaid: sessionAdvancePaid,
+        advancePaidAt,
+        remainingAmount,
+        codAmount: remainingAmount,
+        codCharge,
+        codChargeCollected: codCharge,
+      });
+
+      const verifiedPartialCodTotal = toAmount(
+        normalizedPayment.remainingAmount + normalizedPayment.advancePaid,
+      );
+
+      if (verifiedPartialCodTotal !== expectedPartialCodTotal) {
+        return NextResponse.json(
+          {
+            error:
+              "For Partial-COD, remaining amount + advance must equal items total amount + COD.",
+          },
+          { status: 400 },
+        );
+      }
+
+      orderTotalAmount = expectedPartialCodTotal;
+    } else {
+      normalizedPayment = normalizePaymentData({
+        paymentMethod: "Online",
+        totalAmount: sessionTotalAmount,
+        itemsPrice: itemsTotalAmount,
+        paymentAmount: sessionAdvancePaid,
+        advancePaid: sessionAdvancePaid,
+        advancePaidAt,
+      });
     }
 
     const newOrder = new Order({
@@ -46,15 +121,22 @@ export async function POST(request) {
         product: item?.product,
         customNameToPrint: item?.customNameToPrint,
       })),
-      paymentMethod: "Online",
+      paymentMethod: normalizedPayment.paymentMethod,
+      advancePaidAt: normalizedPayment.advancePaidAt,
+      remainingAmount: normalizedPayment.remainingAmount,
+      codAmount: normalizedPayment.codAmount,
+      codChargeCollected: normalizedPayment.codChargeCollected,
+      advancePaid: normalizedPayment.advancePaid,
       paymentInfo: {
-        id: sessionOrder.razorpayOrderId,
-        status: sessionOrder.razorpayPaymentStatus,
+        id: sessionOrder.paymentInfo?.id || sessionOrder.razorpayOrderId,
+        status:
+          sessionOrder.paymentInfo?.status ||
+          sessionOrder.razorpayPaymentStatus,
       },
-      itemsPrice: sessionOrder.itemsPrice,
+      itemsPrice: itemsTotalAmount,
       taxAmount: 0,
       shippingAmount: 0,
-      totalAmount: sessionOrder.totalAmount,
+      totalAmount: orderTotalAmount,
       orderStatus: "Processing",
       orderNotes: sessionOrder.orderNotes,
       deliveredAt: sessionOrder.deliveredAt,

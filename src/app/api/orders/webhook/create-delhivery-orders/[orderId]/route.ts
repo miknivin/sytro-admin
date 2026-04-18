@@ -8,6 +8,10 @@ import Order from "@/models/Order";
 import Product from "@/models/Products";
 import { createDelhiveryShipment } from "@/utlis/createDelhiveryShipment";
 import { getShipmentDimensionsFromOrderItems } from "@/utlis/shippingDimensions";
+import {
+  getCodCollectAmount,
+  isCashCollectionPaymentMethod,
+} from "@/lib/orders/paymentUtils";
 
 const DELHIVERY_API_TOKEN = process.env.DELHIVERY_API_TOKEN;
 
@@ -89,7 +93,9 @@ export async function POST(
           country: order.shippingInfo.country || "India",
           phone: order.shippingInfo.phoneNo,
           order: order._id.toString(),
-          payment_mode: order.paymentMethod === "COD" ? "COD" : "Prepaid",
+          payment_mode: isCashCollectionPaymentMethod(order.paymentMethod)
+            ? "COD"
+            : "Prepaid",
 
           // Return address = Hifi bags (Ernakulam)
           return_pin: "682031",
@@ -103,8 +109,7 @@ export async function POST(
           products_desc: order.orderItems.map((i: any) => i.name).join(", "),
           hsn_code: "4202", // Bags & backpacks
 
-          cod_amount:
-            order.paymentMethod === "COD" ? order.totalAmount.toString() : "0",
+          cod_amount: getCodCollectAmount(order).toString(),
           order_date: new Date(order.createdAt).toISOString().split("T")[0],
           total_amount: order.totalAmount.toString(),
 

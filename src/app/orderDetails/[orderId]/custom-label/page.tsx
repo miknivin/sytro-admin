@@ -4,7 +4,6 @@ import React, { useEffect } from "react";
 import Barcode from "react-barcode";
 import { useOrderDetailsQuery } from "@/redux/api/orderApi";
 import Spinner from "@/components/common/Spinner";
-import { formatDate } from "@/utlis/formatDate";
 
 interface PageProps {
     params: {
@@ -27,6 +26,12 @@ const CustomLabelPage: React.FC<PageProps> = ({ params }) => {
 
     const order = data.order;
     const waybill = order.waybill || "NO-WAYBILL";
+    const isCashCollectionOrder =
+        order.paymentMethod === "COD" || order.paymentMethod === "Partial-COD";
+    const collectionAmount =
+        order.paymentMethod === "Partial-COD"
+            ? (order.codAmount ?? order.remainingAmount ?? order.totalAmount)
+            : order.totalAmount;
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-100 p-8 print:bg-white print:p-0">
@@ -75,9 +80,9 @@ const CustomLabelPage: React.FC<PageProps> = ({ params }) => {
                         <div className="mt-1 font-bold">Ph: {order.shippingInfo.phoneNo}</div>
                     </div>
                     <div className="flex-1 p-2 text-center text-xs">
-                        <div className="text-lg font-black">{order.paymentMethod === "COD" ? "COD" : "Prepaid"}</div>
+                        <div className="text-lg font-black">{isCashCollectionOrder ? "COD" : "Prepaid"}</div>
                         <div className="font-bold">Surface</div>
-                        <div className="mt-4 text-base font-black">INR {order.totalAmount}</div>
+                        <div className="mt-4 text-base font-black">INR {collectionAmount}</div>
                     </div>
                 </div>
 

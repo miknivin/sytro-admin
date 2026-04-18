@@ -36,6 +36,10 @@ export interface SessionStartedOrder {
   _id: string;
   razorpayOrderId: string;
   razorpayPaymentStatus: string;
+  paymentMethod?: "Online" | "Partial-COD";
+  paymentAmount?: number;
+  advancePaidInThisSession?: number;
+  codCharge?: number;
   shippingInfo: ShippingInfo;
   user: ObjectId | string; // Can be ObjectId or string depending on population
   orderItems: OrderItem[];

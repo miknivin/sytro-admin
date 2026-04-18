@@ -150,10 +150,11 @@ export const orderApi = createApi({
       invalidatesTags: ["SessionStartedOrder"],
     }),
     convertSessionOrder: builder.mutation({
-      query: (sessionOrderId) => ({
+      query: (payload) => ({
         url: "orders/session-to-order",
         method: "POST",
-        body: { sessionOrderId },
+        body:
+          typeof payload === "string" ? { sessionOrderId: payload } : payload,
       }),
       invalidatesTags: ["Order", "SessionStartedOrder", "AdminOrders"],
       transformResponse: (response) => response.order,
@@ -165,6 +166,14 @@ export const orderApi = createApi({
           console.error("Error converting order:", error);
         }
       },
+    }),
+    convertOrderToAdvance: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `orders/convert-to-advance/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Order", "AdminOrders"],
     }),
     createDelhiveryOrder: builder.mutation({
       query: (orderId) => ({
@@ -254,6 +263,7 @@ export const {
   useApplyCouponMutation,
   useSessionStartedOrdersQuery,
   useConvertSessionOrderMutation,
+  useConvertOrderToAdvanceMutation,
   useGetSessionStartedOrderByIdQuery,
   useDeleteSessionOrderByIdMutation,
   useSearchSessionStartedOrdersQuery,

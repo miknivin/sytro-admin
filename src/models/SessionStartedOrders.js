@@ -10,6 +10,28 @@ const sessionStartedOrderSchema = new mongoose.Schema(
       type: String,
       default: "created",
     },
+    paymentMethod: {
+      type: String,
+      enum: ["Online", "Partial-COD"],
+      default: "Online",
+      required: true,
+    },
+    paymentAmount: {
+      type: Number,
+      default: function () {
+        return this.totalAmount || 0;
+      },
+      min: 0,
+    },
+    advancePaidInThisSession: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    codCharge: {
+      type: Number,
+      default: 100,
+    },
     shippingInfo: {
       fullName: { type: String, required: false },
       address: { type: String, required: true },
