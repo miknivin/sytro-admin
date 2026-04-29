@@ -63,7 +63,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
             {/* <ShippingDetails shippingInfo={orderDetails.shippingInfo} /> */}
           </div>
         </div>
-        <CustomerDetails customer={orderDetails.shippingInfo} />
+        <CustomerDetails customer={orderDetails.shippingInfo} orderId={orderId} />
       </div>
     </div>
   );
