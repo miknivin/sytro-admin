@@ -49,7 +49,10 @@ const SessionStartedOrders = () => {
     isError: isErrorAll,
   } = useSessionStartedOrdersQuery(null, {
     skip: !!searchQuery,
+    refetchOnMountOrArgChange: true, // always fetch fresh on page load
+    pollingInterval: 30000,          // auto-refresh every 30 seconds
   });
+
 
   const {
     data: searchedOrdersData,
