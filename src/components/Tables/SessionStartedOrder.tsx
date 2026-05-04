@@ -75,7 +75,8 @@ const SessionStartedOrders = () => {
     const seen = new Set<string>();
 
     return orders.filter((order) => {
-      const key = `${order.user.toString()}-${JSON.stringify(order.shippingInfo)}`;
+      // Each Razorpay order is unique — use razorpayOrderId as the key
+      const key = order.razorpayOrderId;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
