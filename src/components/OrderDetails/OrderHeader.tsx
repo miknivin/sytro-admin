@@ -3,6 +3,7 @@ import RadioDropDown from "./RadioDropDown";
 import toast from "react-hot-toast";
 import {
   useCreateDelhiveryOrderMutation,
+  useCreateShiprocketOrderMutation,
   useLazyGetInvoiceUrlQuery,
 } from "@/redux/api/orderApi";
 import SchedulePickupModal from "../Modals/SchedulePickupModal";
@@ -20,6 +21,9 @@ interface OrderHeaderProps {
   showCreateDelhiveryLink?: boolean;
   hasWaybill?: boolean;
   waybill?: string;
+  showCreateShiprocketLink?: boolean;
+  hasShiprocketOrder?: boolean;
+  shiprocketOrderId?: string;
 }
 
 const OrderHeader: React.FC<OrderHeaderProps> = ({
@@ -32,12 +36,18 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   showCreateDelhiveryLink = false,
   hasWaybill = false,
   waybill = "",
+  showCreateShiprocketLink = false,
+  hasShiprocketOrder = false,
+  shiprocketOrderId = "",
 }) => {
-  const [createDelhiveryOrder, { isLoading }] =
+  const [createDelhiveryOrder, { isLoading: isCreatingDelhivery }] =
     useCreateDelhiveryOrderMutation();
+  const [createShiprocketOrder, { isLoading: isCreatingShiprocket }] =
+    useCreateShiprocketOrderMutation();
   const [showPickupModal, setShowPickupModal] = useState(false);
   const [getInvoiceUrl, { isFetching: isGeneratingInvoice }] =
     useLazyGetInvoiceUrlQuery();
+
   const handleGetInvoice = async (orderId: string) => {
     try {
       const url = await getInvoiceUrl(orderId).unwrap();
@@ -68,6 +78,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
       console.error("Invoice error:", err);
     }
   };
+
   const handleCreateDelhiveryOrder = async () => {
     try {
       const response = await createDelhiveryOrder(orderId).unwrap();
@@ -87,6 +98,25 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
     }
   };
 
+  const handleCreateShiprocketOrder = async () => {
+    try {
+      const response = await createShiprocketOrder(orderId).unwrap();
+      toast.success(
+        `Shiprocket order created: ${response.shiprocketOrderId}`,
+        {
+          duration: 4000,
+          position: "top-right",
+        },
+      );
+    } catch (err: any) {
+      const message = err.data?.message || "Failed to create Shiprocket order";
+      toast.error(message, {
+        duration: 4000,
+        position: "top-right",
+      });
+    }
+  };
+
   return (
     <>
       <div className="flex justify-between">
@@ -99,9 +129,9 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 text-right">
           {/* Show synced DB status if present, otherwise keep the manual status dropdown */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             {hasSyncedDelhiveryStatus ? (
               <div className="flex h-full items-center justify-center">
                 <span className="inline-block min-w-[220px] rounded-lg bg-blue-700 px-6 py-3 text-center text-base font-semibold text-white shadow-md">
@@ -118,23 +148,48 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
               {isGeneratingInvoice ? <Spinner /> : <InvoiceIcon />}
             </button>
           </div>
-          {/* Create Delhivery Order button (only when instructed) */}
-          {showCreateDelhiveryLink && (
-            <button
-              onClick={handleCreateDelhiveryOrder}
-              disabled={isLoading}
-              className={`inline-block text-center text-base font-semibold underline focus:outline-none focus:ring-4 focus:ring-blue-300 ${
-                isLoading
-                  ? "cursor-not-allowed text-blue-300"
-                  : "text-info hover:text-blue-600"
-              }`}
-            >
-              {isLoading ? "Creating..." : "Create Delhivery Order"}
-            </button>
-          )}
+
+          <div className="flex flex-col gap-2">
+            {/* Create Delhivery Order button */}
+            {showCreateDelhiveryLink && (
+              <button
+                onClick={handleCreateDelhiveryOrder}
+                disabled={isCreatingDelhivery}
+                className={`inline-block text-base font-semibold underline focus:outline-none focus:ring-4 focus:ring-blue-300 ${
+                  isCreatingDelhivery
+                    ? "cursor-not-allowed text-blue-300"
+                    : "text-info hover:text-blue-600"
+                }`}
+              >
+                {isCreatingDelhivery ? "Creating Delhivery..." : "Create Delhivery Order"}
+              </button>
+            )}
+
+            {/* Create Shiprocket Order button */}
+            {showCreateShiprocketLink && (
+              <button
+                onClick={handleCreateShiprocketOrder}
+                disabled={isCreatingShiprocket}
+                className={`inline-block text-base font-semibold underline focus:outline-none focus:ring-4 focus:ring-purple-300 ${
+                  isCreatingShiprocket
+                    ? "cursor-not-allowed text-purple-300"
+                    : "text-purple-600 hover:text-purple-800"
+                }`}
+              >
+                {isCreatingShiprocket ? "Creating Shiprocket..." : "Create Shiprocket Order"}
+              </button>
+            )}
+
+            {/* Shiprocket Order ID display */}
+            {hasShiprocketOrder && (
+              <p className="text-sm font-medium text-gray-600">
+                Shiprocket ID: <span className="font-bold">{shiprocketOrderId}</span>
+              </p>
+            )}
+          </div>
 
           {/* Schedule Pickup & View Label button (only when waybill exists) */}
-          {hasWaybill && !showCreateDelhiveryLink && (
+          {hasWaybill && (
             <button
               onClick={() => setShowPickupModal(true)}
               className="inline-block rounded-lg bg-green-600 px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"

@@ -238,6 +238,26 @@ export const orderApi = createApi({
         }
       },
     }),
+    createShiprocketOrder: builder.mutation({
+      query: (orderId) => ({
+        url: `/orders/webhook/create-shiprocket-orders/${orderId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Order", "AdminOrders"],
+      transformResponse: (response) => ({
+        success: response.success,
+        message: response.message,
+        shiprocketOrderId: response.shiprocketOrderId,
+      }),
+      onQueryStarted: async (orderId, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          console.log(`Shiprocket order created: ${data.shiprocketOrderId}`);
+        } catch (error) {
+          console.error("Error creating Shiprocket order:", error);
+        }
+      },
+    }),
 
     getInvoiceUrl: builder.query({
       query: (orderId) => `/orders/invoice/${orderId}`,
@@ -270,5 +290,6 @@ export const {
   useCreateDelhiveryOrderMutation,
   useSyncDelhiveryOrdersMutation,
   useScheduleDelhiveryPickupMutation,
+  useCreateShiprocketOrderMutation,
   useLazyGetInvoiceUrlQuery,
 } = orderApi;

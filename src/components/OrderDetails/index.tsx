@@ -47,6 +47,9 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
         showCreateDelhiveryLink={!orderDetails.waybill}
         hasWaybill={!!orderDetails.waybill}
         waybill={orderDetails.waybill || ""}
+        showCreateShiprocketLink={!orderDetails.shiprocketOrderId}
+        hasShiprocketOrder={!!orderDetails.shiprocketOrderId}
+        shiprocketOrderId={orderDetails.shiprocketOrderId || ""}
       />
       <div className="mt-10 flex w-full flex-col items-stretch justify-center space-y-4 md:space-y-6 xl:flex-row xl:space-x-8 xl:space-y-0">
         <div className="flex w-full flex-col items-start justify-start space-y-4 md:space-y-6 xl:space-y-8">
