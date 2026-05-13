@@ -82,7 +82,7 @@ export async function POST(
     const shiprocketPayload = {
       order_id: order._id.toString(),
       order_date: new Date(order.createdAt).toISOString().split("T")[0],
-      pickup_location: "Primary", // Default or you can make it dynamic
+      pickup_location: "HIFI BAG", // Updated to match Shiprocket account
       billing_customer_name: order.shippingInfo.fullName || "Customer",
       billing_last_name: "",
       billing_address: order.shippingInfo.address,
@@ -107,7 +107,7 @@ export async function POST(
         : "Prepaid",
       sub_total: order.totalAmount,
       length: shipmentDimensions.length,
-      width: shipmentDimensions.width,
+      breadth: shipmentDimensions.width,
       height: shipmentDimensions.height,
       weight: weightInKg,
     };

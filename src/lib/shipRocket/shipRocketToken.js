@@ -10,7 +10,7 @@ let cachedTokenExpiry = null;
 async function loginToShiprocket() {
   const agent = new https.Agent({ secureProtocol: "TLSv1_2_method" });
   const response = await axios.post(
-    "https:///apiv2.shiprocket.in/v1/external/auth/login",
+    "https://apiv2.shiprocket.in/v1/external/auth/login",
     {
       email: process.env.SHIPROCKET_EMAIL,
       password: process.env.SHIPROCKET_PASSWORD,
