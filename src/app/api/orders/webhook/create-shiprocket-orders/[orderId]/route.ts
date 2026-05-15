@@ -6,7 +6,7 @@ import { isAuthenticatedUser, authorizeRoles } from "@/middlewares/auth";
 import dbConnect from "@/lib/db/connection";
 import Order from "@/models/Order";
 import Product from "@/models/Products";
-import { createShiprocketOrder } from "@/lib/shipRocket/createShipRocketOrder";
+import { createShiprocketOrder, assignShiprocketAWB } from "@/lib/shipRocket/createShipRocketOrder";
 import { getShipmentDimensionsFromOrderItems } from "@/utlis/shippingDimensions";
 import {
   getCodCollectAmount,
@@ -128,16 +128,37 @@ export async function POST(
     const shiprocketOrderId = shiprocketResponse.data.order_id;
     const shiprocketShipmentId = shiprocketResponse.data.shipment_id;
 
-    await Order.findByIdAndUpdate(orderId, {
+    // First check if awb_code is returned in the creation response
+    let awbCode = shiprocketResponse.data.awb_code;
+
+    // If not, fetch it using the assign AWB API
+    if (!awbCode && shiprocketShipmentId) {
+      const assignResponse = await assignShiprocketAWB(shiprocketShipmentId);
+      if (assignResponse.success && assignResponse.data?.response?.data?.awb_code) {
+        awbCode = assignResponse.data.response.data.awb_code;
+      } else if (assignResponse.success && assignResponse.data?.awb_code) {
+        // Fallback depending on exact response format
+        awbCode = assignResponse.data.awb_code;
+      }
+    }
+
+    const updateFields: any = {
       shiprocketOrderId,
       orderStatus: "Shipped",
-    });
+    };
+
+    if (awbCode) {
+      updateFields.waybill = awbCode;
+    }
+
+    await Order.findByIdAndUpdate(orderId, updateFields);
 
     return NextResponse.json({
       success: true,
       message: "Shiprocket order created successfully",
       shiprocketOrderId,
       shiprocketShipmentId,
+      waybill: awbCode || undefined,
     });
   } catch (error: any) {
     console.error("Error creating Shiprocket order:", error);

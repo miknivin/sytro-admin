@@ -40,3 +40,40 @@ export async function createShiprocketOrder(orderData) {
     };
   }
 }
+
+export async function assignShiprocketAWB(shipmentId) {
+  try {
+    const token = await getShiprocketToken();
+
+    const response = await axios.post(
+      "https://apiv2.shiprocket.in/v1/external/courier/assign/awb",
+      { shipment_id: shipmentId },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: true,
+          secureProtocol: "TLSv1_2_method",
+        }),
+      }
+    );
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error assigning Shiprocket AWB:", error);
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to assign AWB";
+    return {
+      success: false,
+      error: errorMessage,
+      status: error.response?.status || 500,
+    };
+  }
+}
